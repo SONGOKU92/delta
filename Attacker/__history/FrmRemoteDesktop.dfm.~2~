@@ -1,0 +1,178 @@
+object Form9: TForm9
+  Left = 0
+  Top = 0
+  Caption = 'ScreenCapture | <Victim ID>'
+  ClientHeight = 577
+  ClientWidth = 987
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -12
+  Font.Name = 'Segoe UI'
+  Font.Style = []
+  DesignSize = (
+    987
+    577)
+  TextHeight = 15
+  object Image1: TImage
+    Left = 0
+    Top = 0
+    Width = 987
+    Height = 460
+    Align = alTop
+    Anchors = [akLeft, akTop, akRight, akBottom]
+    Stretch = True
+    OnMouseDown = Image1MouseDown
+    OnMouseMove = Image1MouseMove
+    OnMouseUp = Image1MouseUp
+  end
+  object GroupBox1: TGroupBox
+    Left = 1
+    Top = 466
+    Width = 137
+    Height = 86
+    Anchors = [akLeft, akBottom]
+    Caption = 'Remote Input'
+    TabOrder = 0
+    object CheckBox1: TCheckBox
+      Left = 3
+      Top = 18
+      Width = 97
+      Height = 17
+      Caption = 'Keyboard'
+      TabOrder = 0
+    end
+    object CheckBox2: TCheckBox
+      Left = 3
+      Top = 37
+      Width = 126
+      Height = 17
+      Caption = 'Mouse Clicks/wheel'
+      TabOrder = 1
+    end
+    object CheckBox3: TCheckBox
+      Left = 3
+      Top = 57
+      Width = 118
+      Height = 17
+      Caption = 'Mouse Movment'
+      TabOrder = 2
+    end
+  end
+  object GroupBox2: TGroupBox
+    Left = 144
+    Top = 466
+    Width = 137
+    Height = 86
+    Anchors = [akLeft, akBottom]
+    Caption = 'Options'
+    TabOrder = 1
+    object CheckBox4: TCheckBox
+      Left = 3
+      Top = 18
+      Width = 131
+      Height = 17
+      Caption = 'Original Resolution'
+      TabOrder = 0
+    end
+    object CheckBox5: TCheckBox
+      Left = 3
+      Top = 37
+      Width = 126
+      Height = 17
+      Caption = 'Show Remote Cusor'
+      TabOrder = 1
+    end
+  end
+  object GroupBox3: TGroupBox
+    Left = 287
+    Top = 466
+    Width = 185
+    Height = 45
+    Anchors = [akLeft, akBottom]
+    Caption = 'Interval (ms)'
+    TabOrder = 2
+    object SpinEdit1: TSpinEdit
+      Left = 3
+      Top = 15
+      Width = 179
+      Height = 24
+      MaxValue = 0
+      MinValue = 0
+      TabOrder = 0
+      Value = 0
+    end
+  end
+  object GroupBox4: TGroupBox
+    Left = 475
+    Top = 466
+    Width = 231
+    Height = 45
+    Anchors = [akLeft, akBottom]
+    Caption = 'Monitor: [0]'
+    TabOrder = 3
+    object ComboBox1: TComboBox
+      Left = 3
+      Top = 16
+      Width = 225
+      Height = 23
+      ItemIndex = 0
+      TabOrder = 0
+      Text = '[0]'
+      Items.Strings = (
+        '[0]'
+        '[1]'
+        '[3]')
+    end
+  end
+  object TrackBar1: TTrackBar
+    Left = 287
+    Top = 517
+    Width = 416
+    Height = 32
+    Anchors = [akLeft, akBottom]
+    Max = 100
+    Position = 50
+    TabOrder = 4
+    TickMarks = tmTopLeft
+  end
+  object StatusBar1: TStatusBar
+    Left = 0
+    Top = 558
+    Width = 987
+    Height = 19
+    Panels = <
+      item
+        Text = 'Status: Stopped'
+        Width = 140
+      end
+      item
+        Text = 'Resolution:'
+        Width = 160
+      end
+      item
+        Text = 'Quality: 50'
+        Width = 50
+      end>
+  end
+  object Button1: TButton
+    Left = 848
+    Top = 527
+    Width = 131
+    Height = 25
+    Anchors = [akRight, akBottom]
+    Caption = 'Start'
+    TabOrder = 6
+    OnClick = Button1Click
+  end
+  object Button2: TButton
+    Left = 848
+    Top = 496
+    Width = 131
+    Height = 25
+    Anchors = [akRight, akBottom]
+    Caption = 'Screenshot'
+    TabOrder = 7
+    OnClick = Button2Click
+  end
+end

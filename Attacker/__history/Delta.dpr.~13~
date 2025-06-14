@@ -1,0 +1,47 @@
+program Delta;
+
+
+
+{$R *.dres}
+
+uses
+  Vcl.Forms,
+  FrmMain in 'FrmMain.pas' {Form1},
+  Vcl.Themes,
+  Vcl.Styles,
+  GraphClient in 'GraphClient.pas' {Frame2: TFrame},
+  FrmCnc in 'FrmCnc.pas' {Form2},
+  FrmChat in 'FrmChat.pas' {Form3},
+  FrmTTS in 'FrmTTS.pas' {Form4},
+  FrmNotepad in 'FrmNotepad.pas' {Form5},
+  FrmVisitWeb in 'FrmVisitWeb.pas' {Form6},
+  FrmMsgbox in 'FrmMsgbox.pas' {Form7},
+  FrmRemoteExe in 'FrmRemoteExe.pas' {Form8},
+  FrmRemoteDesktop in 'FrmRemoteDesktop.pas' {Form9},
+  FrmControlCenter in 'FrmControlCenter.pas' {Form10},
+  FrmReverseShell in 'FrmReverseShell.pas' {Form11},
+  FrmPower in 'FrmPower.pas' {Form12},
+  FrmVol in 'FrmVol.pas' {Form13},
+  FrmClipbrd in 'FrmClipbrd.pas' {Form14},
+  FrmRemoteScripting in 'FrmRemoteScripting.pas' {Form15},
+  FrmFun in 'FrmFun.pas' {Form16},
+  FrmCam in 'FrmCam.pas' {Form17};
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  TStyleManager.TrySetStyle('Zodiac');
+  Application.CreateForm(TForm1, Form1);
+  Application.CreateForm(TForm9, Form9);
+  Application.CreateForm(TForm10, Form10);
+  Application.CreateForm(TForm11, Form11);
+  Application.CreateForm(TForm12, Form12);
+  Application.CreateForm(TForm13, Form13);
+  Application.CreateForm(TForm14, Form14);
+  Application.CreateForm(TForm15, Form15);
+  Application.CreateForm(TForm16, Form16);
+  Application.CreateForm(TForm17, Form17);
+  Application.Run;
+end.

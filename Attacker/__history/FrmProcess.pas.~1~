@@ -1,0 +1,28 @@
+unit FrmProcess;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Menus, Vcl.ComCtrls;
+
+type
+  TForm18 = class(TForm)
+    ListView1: TListView;
+    processesPopup: TPopupMenu;
+    R1: TMenuItem;
+    K1: TMenuItem;
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  Form18: TForm18;
+
+implementation
+
+{$R *.dfm}
+
+end.

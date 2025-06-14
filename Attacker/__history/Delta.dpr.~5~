@@ -1,0 +1,23 @@
+program Delta;
+
+
+
+{$R *.dres}
+
+uses
+  Vcl.Forms,
+  FrmMain in 'FrmMain.pas' {Form1},
+  Vcl.Themes,
+  Vcl.Styles,
+  FrameShell in 'FrameShell.pas' {Frame1: TFrame},
+  GraphClient in 'GraphClient.pas' {Frame2: TFrame};
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  TStyleManager.TrySetStyle('Zodiac');
+  Application.CreateForm(TForm1, Form1);
+  Application.Run;
+end.

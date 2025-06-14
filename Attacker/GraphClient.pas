@@ -1,0 +1,94 @@
+unit GraphClient;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+  System.Classes,
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, acPNG, Vcl.ExtCtrls,
+  Vcl.StdCtrls;
+
+type
+  TFrame2 = class(TFrame)
+    Image2: TImage;
+    Label3: TLabel;
+    Label4: TLabel;
+    procedure FrameMouseDown(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure FrameMouseMove(Sender: TObject; Shift: TShiftState;
+      X, Y: Integer);
+    procedure FrameMouseUp(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure Image2MouseDown(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure Label3MouseDown(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+  private
+    FDragging: Boolean;
+    FStartPoint: TPoint;
+  public
+    { Public declarations }
+  end;
+
+implementation
+
+{$R *.dfm}
+
+procedure TFrame2.FrameMouseDown(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+begin
+  // Start dragging
+  if Button = mbLeft then
+  begin
+    FDragging := True;
+    FStartPoint := Point(X, Y); // Store the starting point
+    SetCapture(Self.Handle); // Capture mouse events
+  end;
+end;
+
+procedure TFrame2.FrameMouseMove(Sender: TObject; Shift: TShiftState;
+  X, Y: Integer);
+var
+  NewPosition: TPoint;
+begin
+  if FDragging then
+  begin
+    // Calculate the new position of the frame
+    NewPosition := Point(Self.Left + (X - FStartPoint.X),
+      Self.Top + (Y - FStartPoint.Y));
+    Self.SetBounds(NewPosition.X, NewPosition.Y, Self.Width, Self.Height);
+    // Move the frame
+  end;
+end;
+
+procedure TFrame2.FrameMouseUp(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+begin
+  if Button = mbLeft then
+  begin
+    FDragging := False;
+    ReleaseCapture; // Release mouse capture
+  end;
+end;
+
+procedure TFrame2.Image2MouseDown(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+begin
+  self.Image2.ControlStyle := Image2.ControlStyle + [csAcceptsControls, csCaptureMouse];
+
+  // Make TLabel invisible to mouse
+  self.Label3.ControlStyle := Label3.ControlStyle + [csAcceptsControls, csCaptureMouse];
+   self.Label4.ControlStyle := Label4.ControlStyle + [csAcceptsControls, csCaptureMouse];
+end;
+
+procedure TFrame2.Label3MouseDown(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+begin
+  self.Image2.ControlStyle := Image2.ControlStyle + [csAcceptsControls, csCaptureMouse];
+
+  // Make TLabel invisible to mouse
+  self.Label3.ControlStyle := Label3.ControlStyle + [csAcceptsControls, csCaptureMouse];
+   self.Label4.ControlStyle := Label4.ControlStyle + [csAcceptsControls, csCaptureMouse];
+end;
+
+end.

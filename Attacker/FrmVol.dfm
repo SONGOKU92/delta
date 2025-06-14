@@ -1,0 +1,64 @@
+object Form13: TForm13
+  Left = 0
+  Top = 0
+  Caption = 'Form13'
+  ClientHeight = 167
+  ClientWidth = 533
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -12
+  Font.Name = 'Segoe UI'
+  Font.Style = []
+  OnCreate = FormCreate
+  TextHeight = 15
+  object GroupBox1: TGroupBox
+    Left = 0
+    Top = 0
+    Width = 533
+    Height = 81
+    Align = alTop
+    Caption = 'Output (Headphones/Speaker)'
+    TabOrder = 0
+    object Label1: TLabel
+      Left = 15
+      Top = 22
+      Width = 6
+      Height = 15
+      Caption = '0'
+    end
+    object TrackBar1: TTrackBar
+      Left = 3
+      Top = 36
+      Width = 527
+      Height = 45
+      Max = 100
+      TabOrder = 0
+    end
+  end
+  object GroupBox2: TGroupBox
+    Left = 0
+    Top = 81
+    Width = 533
+    Height = 81
+    Align = alTop
+    Caption = 'Input (Microphone)'
+    TabOrder = 1
+    ExplicitTop = 8
+    object Label2: TLabel
+      Left = 15
+      Top = 22
+      Width = 6
+      Height = 15
+      Caption = '0'
+    end
+    object TrackBar2: TTrackBar
+      Left = 3
+      Top = 36
+      Width = 527
+      Height = 45
+      Max = 100
+      TabOrder = 0
+    end
+  end
+end

@@ -1,0 +1,59 @@
+object Frame1: TFrame1
+  Left = 0
+  Top = 0
+  Width = 692
+  Height = 254
+  TabOrder = 0
+  object Splitter1: TSplitter
+    Left = 482
+    Top = 0
+    Width = 2
+    Height = 231
+    Align = alRight
+    Visible = False
+    ExplicitLeft = 533
+    ExplicitHeight = 270
+  end
+  object Image1: TImage
+    Left = 484
+    Top = 0
+    Width = 208
+    Height = 231
+    Align = alRight
+    Visible = False
+    ExplicitLeft = 432
+    ExplicitHeight = 222
+  end
+  object Memo1: TMemo
+    Left = 0
+    Top = 0
+    Width = 482
+    Height = 231
+    Align = alClient
+    Lines.Strings = (
+      'Sierra Command and Control.'
+      '/help for more info.'
+      ''
+      '')
+    ScrollBars = ssVertical
+    TabOrder = 0
+  end
+  object Edit1: TEdit
+    Left = 0
+    Top = 231
+    Width = 692
+    Height = 23
+    Align = alBottom
+    TabOrder = 1
+    TextHint = 'Command...'
+    OnKeyDown = Edit1KeyDown
+  end
+  object PageControl1: TPageControl
+    Left = 464
+    Top = 260
+    Width = 33
+    Height = 29
+    TabOrder = 2
+    Visible = False
+  end
+end

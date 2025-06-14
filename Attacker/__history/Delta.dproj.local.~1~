@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2024/10/25 17:55:58.000.021,=C:\Users\oline\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2024/10/25 21:17:21.000.411,=C:\Users\oline\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2024/10/25 22:21:12.000.535,=C:\Users\oline\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2024/10/25 22:42:57.000.191,C:\Users\oline\Documents\Embarcadero\Studio\Projects\Unit1.dfm=C:\Users\oline\Desktop\DeltaProj\Unit1.dfm</Transaction>
+    <Transaction>2024/10/25 22:42:57.000.191,C:\Users\oline\Documents\Embarcadero\Studio\Projects\Unit1.pas=C:\Users\oline\Desktop\DeltaProj\Unit1.pas</Transaction>
+    <Transaction>2024/10/25 22:43:02.000.064,C:\Users\oline\Documents\Embarcadero\Studio\Projects\Project1.dproj=C:\Users\oline\Desktop\DeltaProj\Delta.dproj</Transaction>
+    <Transaction>2024/10/25 22:43:06.000.818,C:\Users\oline\Desktop\DeltaProj\Unit1.dfm=C:\Users\oline\Desktop\DeltaProj\FrmMain.dfm</Transaction>
+    <Transaction>2024/10/25 22:43:06.000.818,C:\Users\oline\Desktop\DeltaProj\Unit1.pas=C:\Users\oline\Desktop\DeltaProj\FrmMain.pas</Transaction>
+    <Transaction>2024/10/25 22:57:00.000.222,=C:\Users\oline\Desktop\DeltaProj\Unit1.pas</Transaction>
+    <Transaction>2024/10/25 23:12:27.000.793,C:\Users\oline\Desktop\DeltaProj\Unit1.pas=C:\Users\oline\Desktop\DeltaProj\shell.pas</Transaction>
+    <Transaction>2024/10/25 23:12:27.000.793,C:\Users\oline\Desktop\DeltaProj\Unit1.dfm=C:\Users\oline\Desktop\DeltaProj\shell.dfm</Transaction>
+    <Transaction>2024/10/26 19:43:56.552,=C:\Users\oline\Desktop\DeltaProj\Unit1.pas</Transaction>
+    <Transaction>2024/10/26 19:46:14.424,=C:\Users\oline\Downloads\Computer-Off.png</Transaction>
+    <Transaction>2024/10/26 19:46:14.470,=C:\Users\oline\Downloads\Computer-On.png</Transaction>
+    <Transaction>2024/10/26 20:07:33.178,=C:\Users\oline\Downloads\ComputerOffline.png</Transaction>
+    <Transaction>2024/10/26 20:07:33.210,=C:\Users\oline\Downloads\ComputerOnline.png</Transaction>
+    <Transaction>2024/10/26 22:12:27.889,C:\Users\oline\Desktop\DeltaProj\FrameShell.pas=C:\Users\oline\Desktop\DeltaProj\shell.pas</Transaction>
+    <Transaction>2024/10/26 22:12:27.889,C:\Users\oline\Desktop\DeltaProj\FrameShell.dfm=C:\Users\oline\Desktop\DeltaProj\shell.dfm</Transaction>
+    <Transaction>2024/10/27 00:33:44.462,=C:\Users\oline\Desktop\DeltaProj\Unit2.pas</Transaction>
+    <Transaction>2024/10/27 00:33:50.452,C:\Users\oline\Desktop\DeltaProj\GraphClient.pas=C:\Users\oline\Desktop\DeltaProj\Unit2.pas</Transaction>
+    <Transaction>2024/10/27 00:33:50.452,C:\Users\oline\Desktop\DeltaProj\GraphClient.dfm=C:\Users\oline\Desktop\DeltaProj\Unit2.dfm</Transaction>
+  </Transactions>
+</BorlandProject>

@@ -1,0 +1,41 @@
+object Form11: TForm11
+  Left = 0
+  Top = 0
+  Caption = 'Form11'
+  ClientHeight = 337
+  ClientWidth = 519
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -12
+  Font.Name = 'Segoe UI'
+  Font.Style = []
+  OnClose = FormClose
+  OnCreate = FormCreate
+  TextHeight = 15
+  object Memo1: TMemo
+    Left = 0
+    Top = 0
+    Width = 519
+    Height = 314
+    Align = alClient
+    TabOrder = 0
+    ExplicitLeft = 152
+    ExplicitTop = 104
+    ExplicitWidth = 185
+    ExplicitHeight = 89
+  end
+  object Edit1: TEdit
+    Left = 0
+    Top = 314
+    Width = 519
+    Height = 23
+    Align = alBottom
+    TabOrder = 1
+    TextHint = 'Command goes here...'
+    OnKeyPress = Edit1KeyPress
+    ExplicitLeft = 96
+    ExplicitTop = 192
+    ExplicitWidth = 121
+  end
+end

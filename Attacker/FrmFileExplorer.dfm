@@ -1,0 +1,173 @@
+object Form21: TForm21
+  Left = 0
+  Top = 0
+  Caption = 'Form21'
+  ClientHeight = 448
+  ClientWidth = 874
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -12
+  Font.Name = 'Segoe UI'
+  Font.Style = []
+  OnCreate = FormCreate
+  TextHeight = 15
+  object PageControl1: TPageControl
+    Left = 0
+    Top = 0
+    Width = 874
+    Height = 448
+    ActivePage = TabSheet1
+    Align = alClient
+    TabOrder = 0
+    object TabSheet1: TTabSheet
+      Caption = 'File Explorer'
+      DesignSize = (
+        866
+        418)
+      object GroupBox1: TGroupBox
+        Left = 3
+        Top = 3
+        Width = 158
+        Height = 46
+        Caption = 'Drive'
+        TabOrder = 0
+        object ComboBox1: TComboBox
+          Left = 3
+          Top = 17
+          Width = 150
+          Height = 23
+          TabOrder = 0
+          OnChange = ComboBox1Change
+        end
+      end
+      object GroupBox2: TGroupBox
+        Left = 167
+        Top = 3
+        Width = 442
+        Height = 46
+        Anchors = [akLeft, akTop, akRight]
+        Caption = 'Directory'
+        TabOrder = 1
+        DesignSize = (
+          442
+          46)
+        object Edit1: TEdit
+          Left = 3
+          Top = 17
+          Width = 436
+          Height = 23
+          Anchors = [akLeft, akRight]
+          TabOrder = 0
+        end
+      end
+      object GroupBox3: TGroupBox
+        Left = 615
+        Top = 3
+        Width = 248
+        Height = 46
+        Anchors = [akTop, akRight]
+        Caption = 'Search'
+        TabOrder = 2
+        object Edit2: TEdit
+          Left = 3
+          Top = 17
+          Width = 166
+          Height = 23
+          TabOrder = 0
+          TextHint = 'example.txt...'
+        end
+        object Button1: TButton
+          Left = 174
+          Top = 16
+          Width = 65
+          Height = 25
+          Caption = 'Search'
+          TabOrder = 1
+        end
+      end
+      object ListView1: TListView
+        Left = 0
+        Top = 55
+        Width = 866
+        Height = 344
+        Align = alBottom
+        Anchors = [akLeft, akTop, akRight, akBottom]
+        Columns = <
+          item
+            AutoSize = True
+            Caption = 'Name'
+          end
+          item
+            AutoSize = True
+            Caption = 'Date Modified'
+          end
+          item
+            AutoSize = True
+            Caption = 'Attributes'
+          end
+          item
+            AutoSize = True
+            Caption = 'Type'
+          end
+          item
+            AutoSize = True
+            Caption = 'Size'
+          end>
+        RowSelect = True
+        SortType = stText
+        TabOrder = 3
+        ViewStyle = vsReport
+      end
+      object StatusBar1: TStatusBar
+        Left = 0
+        Top = 399
+        Width = 866
+        Height = 19
+        Panels = <
+          item
+            Text = 'N/A'
+            Width = 50
+          end>
+      end
+    end
+    object TTabSheet
+      Caption = 'File Transfers'
+      ImageIndex = 1
+      object ListView2: TListView
+        Left = 0
+        Top = 0
+        Width = 866
+        Height = 418
+        Align = alClient
+        Columns = <
+          item
+            Caption = 'Status'
+            Width = 120
+          end
+          item
+            Caption = 'File Name'
+            Width = 150
+          end
+          item
+            Caption = 'Path'
+            Width = 180
+          end
+          item
+            Caption = 'Progress'
+            Width = 90
+          end
+          item
+            Caption = 'Transefered'
+            Width = 100
+          end
+          item
+            Caption = 'File Size'
+            Width = 180
+          end>
+        TabOrder = 0
+        ViewStyle = vsReport
+      end
+    end
+  end
+end

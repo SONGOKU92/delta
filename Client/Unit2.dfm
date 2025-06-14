@@ -1,0 +1,38 @@
+object Form2: TForm2
+  Left = 0
+  Top = 0
+  Caption = 'Custom Caption'
+  ClientHeight = 404
+  ClientWidth = 388
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -12
+  Font.Name = 'Segoe UI'
+  Font.Style = []
+  OnClose = FormClose
+  TextHeight = 15
+  object Edit1: TEdit
+    Left = 0
+    Top = 381
+    Width = 388
+    Height = 23
+    Align = alBottom
+    TabOrder = 0
+    TextHint = 'Your message here...'
+    OnKeyPress = Edit1KeyPress
+    ExplicitLeft = 104
+    ExplicitTop = 128
+    ExplicitWidth = 121
+  end
+  object Memo1: TMemo
+    Left = 0
+    Top = 0
+    Width = 388
+    Height = 381
+    Align = alClient
+    ReadOnly = True
+    ScrollBars = ssVertical
+    TabOrder = 1
+  end
+end

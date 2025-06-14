@@ -1,0 +1,36 @@
+unit FrmFileExplorer;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ComCtrls, Vcl.StdCtrls;
+
+type
+  TForm21 = class(TForm)
+    PageControl1: TPageControl;
+    TabSheet1: TTabSheet;
+    GroupBox1: TGroupBox;
+    ComboBox1: TComboBox;
+    GroupBox2: TGroupBox;
+    Edit1: TEdit;
+    GroupBox3: TGroupBox;
+    Edit2: TEdit;
+    Button1: TButton;
+    ListView1: TListView;
+    ListView2: TListView;
+    StatusBar1: TStatusBar;
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  Form21: TForm21;
+
+implementation
+
+{$R *.dfm}
+
+end.

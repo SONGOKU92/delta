@@ -1,0 +1,30 @@
+program Delta;
+
+
+
+{$R *.dres}
+
+uses
+  Vcl.Forms,
+  FrmMain in 'FrmMain.pas' {Form1},
+  Vcl.Themes,
+  Vcl.Styles,
+  GraphClient in 'GraphClient.pas' {Frame2: TFrame},
+  FrmCnc in 'FrmCnc.pas' {Form2},
+  FrmChat in 'FrmChat.pas' {Form3},
+  FrmTTS in 'FrmTTS.pas' {Form4},
+  FrmNotepad in 'FrmNotepad.pas' {Form5};
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  TStyleManager.TrySetStyle('Zodiac');
+  Application.CreateForm(TForm1, Form1);
+  Application.CreateForm(TForm2, Form2);
+  Application.CreateForm(TForm3, Form3);
+  Application.CreateForm(TForm4, Form4);
+  Application.CreateForm(TForm5, Form5);
+  Application.Run;
+end.

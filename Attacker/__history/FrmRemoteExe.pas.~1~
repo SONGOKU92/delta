@@ -1,0 +1,65 @@
+unit FrmRemoteExe;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+  System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.WinXCtrls;
+
+type
+  TForm8 = class(TForm)
+    GroupBox1: TGroupBox;
+    RadioButton1: TRadioButton;
+    RadioButton2: TRadioButton;
+    ToggleSwitch1: TToggleSwitch;
+    Edit1: TEdit;
+    Button1: TButton;
+    GroupBox2: TGroupBox;
+    Edit2: TEdit;
+    Button2: TButton;
+    procedure RadioButton1Click(Sender: TObject);
+    procedure RadioButton2Click(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  Form8: TForm8;
+
+implementation
+
+{$R *.dfm}
+
+procedure TForm8.RadioButton1Click(Sender: TObject);
+begin
+  if RadioButton1.Checked = true then
+  begin
+       Groupbox1.Enabled := True;
+         Groupbox2.Enabled := false;
+  end
+  else if RadioButton1.Checked = false then
+  begin
+         Groupbox1.Enabled := False;
+         Groupbox2.Enabled := True;
+  end;
+
+end;
+
+procedure TForm8.RadioButton2Click(Sender: TObject);
+begin
+  if RadioButton2.Checked = true then
+  begin
+       Groupbox2.Enabled := True;
+         Groupbox1.Enabled := false;
+  end
+  else if RadioButton2.Checked = false then
+  begin
+         Groupbox2.Enabled := False;
+         Groupbox1.Enabled := True;
+  end;
+end;
+
+end.

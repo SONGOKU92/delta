@@ -1,0 +1,37 @@
+unit FrmRemoteScripting;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls;
+
+type
+  TForm15 = class(TForm)
+    PageControl1: TPageControl;
+    TabSheet1: TTabSheet;
+    Memo1: TMemo;
+    Button1: TButton;
+    TabSheet3: TTabSheet;
+    Memo2: TMemo;
+    Button2: TButton;
+    TabSheet2: TTabSheet;
+    Memo3: TMemo;
+    Button3: TButton;
+    JavaScript: TTabSheet;
+    Memo4: TMemo;
+    Button4: TButton;
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  Form15: TForm15;
+
+implementation
+
+{$R *.dfm}
+
+end.
